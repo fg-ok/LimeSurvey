@@ -10,8 +10,8 @@
         <type>question_theme</type>
         <title>Bootstrap buttons</title>
         <creationDate>22/05/2018</creationDate>
-        <author>Dominik Vitt</author>
-        <authorEmail>dominik.vitt@limesurvey.org</authorEmail>
+        <author>LimeSurvey GmbH</author>
+        <authorEmail>info@limesurvey.org</authorEmail>
         <authorUrl>http://www.limesurvey.org</authorUrl>
         <copyright>Copyright (C) 2005 - 2018 LimeSurvey Gmbh, Inc. All rights reserved.</copyright>
         <license>GNU General Public License version 2 or later</license>
@@ -71,12 +71,12 @@
             <inputtype>buttongroup</inputtype>
             <options>
                 <default>Default</default>
-                <col-sm-12>1</col-sm-12>
-                <col-sm-6>2</col-sm-6>
-                <col-sm-4>3</col-sm-4>
-                <col-sm-3>4</col-sm-3>
-                <col-sm-2>6</col-sm-2>
-                <col-sm-1>12</col-sm-1>
+                <col-md-12>1</col-md-12>
+                <col-md-6>2</col-md-6>
+                <col-md-4>3</col-md-4>
+                <col-md-3>4</col-md-3>
+                <col-md-2>6</col-md-2>
+                <col-md-1>12</col-md-1>
             </options>
             <default></default>
             <help>Choose maximum number of buttons in a row</help>

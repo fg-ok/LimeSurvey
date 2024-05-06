@@ -8,7 +8,7 @@ class JsonWriter extends Writer
      */
     private $file = null;
     /**
-     * first don't need seperator
+     * first don't need separator
      */
     protected $havePrev = false;
 
@@ -33,7 +33,7 @@ class JsonWriter extends Writer
             }
         }
     }
-    
+
     protected function outputRecord($headers, $values, FormattingOptions $oOptions)
     {
         $aJson = array_combine($headers, $values);

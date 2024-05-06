@@ -2,6 +2,8 @@
 
 namespace LimeSurvey\PluginManager;
 
+use LSActiveRecord;
+
 /**
  * Base class for plugins.
  */
@@ -30,12 +32,12 @@ abstract class PluginBase implements iPlugin
     /**
      * @var string
      */
-    static protected $description = 'Base plugin object';
+    protected static $description = 'Base plugin object';
 
     /**
      * @var string
      */
-    static protected $name = 'PluginBase';
+    protected static $name = 'PluginBase';
 
     /**
      * @var ?
@@ -73,6 +75,12 @@ abstract class PluginBase implements iPlugin
     public $allowedPublicMethods = null;
 
     /**
+     * List of settings that should be encrypted before saving.
+     * @var string[]
+     */
+    protected $encryptedSettings = [];
+
+    /**
      * Constructor for the plugin
      * @todo Add proper type hint in 3.0
      * @param PluginManager $manager    The plugin manager instantiating the object
@@ -107,11 +115,11 @@ abstract class PluginBase implements iPlugin
             return;
         }
 
-        // Set plugin specific locale file to locale/<lang>/<lang>.mo
+        // Set plugin specific locale file to locale/<lang>/<lang>.mo, and DB replacement
         \Yii::app()->setComponent(
-            get_class($this).'Messages',
+            get_class($this) . 'Messages',
             [
-                'class'            => 'LSCGettextMessageSource',
+                'class'            => 'LSMessageSource',
                 'cachingDuration'  => 3600,
                 'forceTranslation' => true,
                 'useMoFile'        => true,
@@ -133,7 +141,21 @@ abstract class PluginBase implements iPlugin
      */
     protected function get($key = null, $model = null, $id = null, $default = null)
     {
-        return $this->getStore()->get($this, $key, $model, $id, $default);
+        $data = $this->getStore()->get($this, $key, $model, $id, $default);
+        // Decrypt the attribute if needed
+        // TODO: Handle decryption in storage class, as that would allow each storage to handle
+        // it on it's own way. Currently there is no good way of telling the storage which
+        // attributes should be encrypted. Adding a method to the storage interface would break
+        // backward compatibility. See https://bugs.limesurvey.org/view.php?id=18375#c72133
+        if (!empty($data) && in_array($key, $this->encryptedSettings)) {
+            try {
+                $json = LSActiveRecord::decryptSingle($data);
+                $data = !empty($json) ? json_decode((string) $json, true) : $json;
+            } catch (\Throwable $e) {
+                // If decryption fails, just leave the value untouched (it was probably saved as plain text)
+            }
+        }
+        return $data;
     }
 
     /**
@@ -176,7 +198,7 @@ abstract class PluginBase implements iPlugin
         $settings = $this->settings;
         foreach ($settings as $name => &$setting) {
             if ($getValues) {
-                $setting['current'] = $this->get($name, null, null, isset($setting['default']) ? $setting['default'] : null);
+                $setting['current'] = $this->get($name, null, null, $setting['default'] ?? null);
             }
             if ($setting['type'] == 'logo') {
                 $setting['path'] = $this->publish($setting['path']);
@@ -211,14 +233,13 @@ abstract class PluginBase implements iPlugin
     public function publish($fileName)
     {
         // Check if filename is relative.
-        if (strpos('//', $fileName) === false) {
+        if (strpos('//', (string) $fileName) === false) {
             // This is a limesurvey relative path.
-            if (strpos('/', $fileName) === 0) {
-                $url = \Yii::getPathOfAlias('webroot').$fileName;
-
+            if (strpos('/', (string) $fileName) === 0) {
+                $url = \Yii::getPathOfAlias('webroot') . $fileName;
             } else {
                 // This is a plugin relative path.
-                $path = \Yii::getPathOfAlias('webroot.plugins.'.get_class($this)).DIRECTORY_SEPARATOR.$fileName;
+                $path = \Yii::getPathOfAlias('webroot.plugins.' . get_class($this)) . DIRECTORY_SEPARATOR . $fileName;
                 /*
                  * By using the asset manager the assets are moved to a publicly accessible path.
                  * This approach allows a locked down plugin directory that is not publicly accessible.
@@ -252,7 +273,6 @@ abstract class PluginBase implements iPlugin
     }
 
     /**
-     *
      * @param array<string, mixed> $settings
      * @return void
      */
@@ -275,6 +295,19 @@ abstract class PluginBase implements iPlugin
      */
     protected function set($key, $data, $model = null, $id = null)
     {
+        /* Date time settings format */
+        if (isset($this->settings[$key]['type']) && $this->settings[$key]['type'] == 'date' && !empty($this->settings[$key]['saveformat'])) {
+            $data = LimesurveyApi::getFormattedDateTime($data, $this->settings[$key]['saveformat']);
+        }
+        // Encrypt the attribute if needed
+        // TODO: Handle encryption in storage class, as that would allow each storage to handle
+        // it on it's own way. Currently there is no good way of telling the storage which
+        // attributes should be encrypted. Adding a method to the storage interface would break
+        // backward compatibility. See https://bugs.limesurvey.org/view.php?id=18375#c72133
+        if (!empty($data) && in_array($key, $this->encryptedSettings)) {
+            // Data is json encoded before encryption because it might be an array or object.
+            $data = LSActiveRecord::encryptSingle(json_encode($data));
+        }
         return $this->getStore()->set($this, $key, $data, $model, $id);
     }
 
@@ -344,12 +377,12 @@ abstract class PluginBase implements iPlugin
      */
     public function renderPartial($viewfile, $data, $return = false, $processOutput = false)
     {
-        $alias = 'plugin_views_folder'.$this->id;
+        $alias = 'plugin_views_folder' . $this->id;
         \Yii::setPathOfAlias($alias, $this->getDir());
-        $fullAlias = $alias.'.views.'.$viewfile;
+        $fullAlias = $alias . '.views.' . $viewfile;
 
         if (isset($data['plugin'])) {
-            throw new InvalidArgumentException("Key 'plugin' in data variable is for plugin base only. Please use another key name.");
+            throw new \InvalidArgumentException("Key 'plugin' in data variable is for plugin base only. Please use another key name.");
         }
 
         // Provide this so we can use $plugin->gT() in plugin views
@@ -373,7 +406,7 @@ abstract class PluginBase implements iPlugin
                 '',
                 $sToTranslate,
                 array(),
-                get_class($this).'Messages',
+                get_class($this) . 'Messages',
                 $sLanguage
             ),
             $sEscapeMode
@@ -396,7 +429,6 @@ abstract class PluginBase implements iPlugin
         }
 
         return $translation;
-
     }
 
     /**
@@ -410,7 +442,7 @@ abstract class PluginBase implements iPlugin
     public function log($message, $level = \CLogger::LEVEL_TRACE)
     {
         $category = $this->getName();
-        \Yii::log($message, $level, 'plugin.'.$category);
+        \Yii::log($message, $level, 'plugin.' . $category);
     }
 
     /**
@@ -426,7 +458,7 @@ abstract class PluginBase implements iPlugin
             if (\PHP_VERSION_ID < 80000) {
                 libxml_disable_entity_loader(false);
             }
-        $this->config = simplexml_load_file(realpath($file));
+            $this->config = simplexml_load_file(realpath($file));
             if (\PHP_VERSION_ID < 80000) {
                 libxml_disable_entity_loader(true);
             }
@@ -442,7 +474,7 @@ abstract class PluginBase implements iPlugin
                     $pluginModel = \Plugin::model()->findByPk($this->id);
                     // "Impossible"
                     if (empty($pluginModel)) {
-                        throw new \Exception('Internal error: Found no database entry for plugin id '.$this->id);
+                        throw new \Exception('Internal error: Found no database entry for plugin id ' . $this->id);
                     }
                     $this->checkActive($pluginModel);
                     $this->saveNewVersion($pluginModel);
@@ -483,9 +515,9 @@ abstract class PluginBase implements iPlugin
                         'user_id' => \Yii::app()->user->id,
                         'title'   => gT('Plugin error'),
                         'message' =>
-                            '<span class="fa fa-exclamation-circle text-warning"></span>&nbsp;'.
-                            gT('Could not activate plugin '.$this->getName()).'. '.
-                            gT('Reason:').' '.$result->get('message'),
+                            '<span class="ri-error-warning-fill"></span>&nbsp;' .
+                            gT('Could not activate plugin ' . $this->getName()) . '. ' .
+                            gT('Reason:') . ' ' . $result->get('message'),
                         'importance' => \Notification::HIGH_IMPORTANCE
                     ]
                 );
@@ -505,8 +537,8 @@ abstract class PluginBase implements iPlugin
             'user_id' => \Yii::app()->user->id,
             'title'   => gT('Plugin error'),
             'message' =>
-                '<span class="fa fa-exclamation-circle text-warning"></span>&nbsp;'.
-                gT('Could not read config file for plugin '.$this->getName()).'. '.
+                '<span class="ri-error-warning-fill"></span>&nbsp;' .
+                gT('Could not read config file for plugin ' . $this->getName()) . '. ' .
                 gT('Config file is malformed or null.'),
             'importance' => \Notification::HIGH_IMPORTANCE
             ]
@@ -533,13 +565,18 @@ abstract class PluginBase implements iPlugin
 
     /**
      * Saves the new version from config into database
-     * @return boolean
+     * @return void
      */
     protected function saveNewVersion()
     {
-        $pluginModel = \Plugin::model()->findByPk($this->id);
-        $pluginModel->version = (string) $this->config->metadata->version;
-        return $pluginModel->update();
+        \Yii::app()->db->createCommand()->update(
+            '{{plugins}}',
+            ['version' => (string)$this->config->metadata->version],
+            'id=:id',
+            [
+                ':id' => $this->id
+            ]
+        );
     }
 
     /**
@@ -549,20 +586,20 @@ abstract class PluginBase implements iPlugin
      */
     protected function registerScript($relativePathToScript, $parentPlugin = null)
     {
-        $parentPlugin = $parentPlugin===null ? get_class($this) : $parentPlugin;
+        $parentPlugin = $parentPlugin ?? get_class($this);
 
         $scriptToRegister = null;
-        if (file_exists(\Yii::getPathOfAlias('userdir').'/plugins/'.$parentPlugin.'/'.$relativePathToScript)) {
+        if (file_exists(\Yii::getPathOfAlias('userdir') . '/plugins/' . $parentPlugin . '/' . $relativePathToScript)) {
             $scriptToRegister = \Yii::app()->getAssetManager()->publish(
-                \Yii::getPathOfAlias('userdir').'/plugins/'.$parentPlugin.'/'.$relativePathToScript
+                \Yii::getPathOfAlias('userdir') . '/plugins/' . $parentPlugin . '/' . $relativePathToScript
             );
-        } elseif (file_exists(\Yii::app()->getBasePath().'/plugins/'.$parentPlugin.'/'.$relativePathToScript)) {
+        } elseif (file_exists(\Yii::app()->getBasePath() . '/plugins/' . $parentPlugin . '/' . $relativePathToScript)) {
             $scriptToRegister = \Yii::app()->getAssetManager()->publish(
-                \Yii::app()->getBasePath().'/plugins/'.$parentPlugin.'/'.$relativePathToScript
+                \Yii::app()->getBasePath() . '/plugins/' . $parentPlugin . '/' . $relativePathToScript
             );
-        } elseif (file_exists(\Yii::app()->getBasePath().'/application/core/plugins/'.$parentPlugin.'/'.$relativePathToScript)) {
+        } elseif (file_exists(\Yii::app()->getBasePath() . '/application/core/plugins/' . $parentPlugin . '/' . $relativePathToScript)) {
             $scriptToRegister = \Yii::app()->getAssetManager()->publish(
-                \Yii::app()->getBasePath().'/application/core/plugins/'.$parentPlugin.'/'.$relativePathToScript
+                \Yii::app()->getBasePath() . '/application/core/plugins/' . $parentPlugin . '/' . $relativePathToScript
             );
         }
         \Yii::app()->getClientScript()->registerScriptFile($scriptToRegister);
@@ -575,22 +612,32 @@ abstract class PluginBase implements iPlugin
      */
     protected function registerCss($relativePathToCss, $parentPlugin = null)
     {
-        $parentPlugin = $parentPlugin===null ? get_class($this) : $parentPlugin;
+        $parentPlugin = $parentPlugin ?? get_class($this);
 
         $cssToRegister = null;
-        if (file_exists(\Yii::getPathOfAlias('userdir').'/plugins/'.$parentPlugin.'/'.$relativePathToCss)) {
+        if (file_exists(\Yii::getPathOfAlias('userdir') . '/plugins/' . $parentPlugin . '/' . $relativePathToCss)) {
             $cssToRegister = \Yii::app()->getAssetManager()->publish(
-                \Yii::getPathOfAlias('userdir').'/plugins/'.$parentPlugin.'/'.$relativePathToCss
+                \Yii::getPathOfAlias('userdir') . '/plugins/' . $parentPlugin . '/' . $relativePathToCss
             );
-        } elseif (file_exists(YiiBase::getPathOfAlias('webroot').'/plugins/'.$parentPlugin.'/'.$relativePathToCss)) {
+        } elseif (file_exists(\Yii::getPathOfAlias('webroot') . '/plugins/' . $parentPlugin . '/' . $relativePathToCss)) {
             $cssToRegister = \Yii::app()->getAssetManager()->publish(
-                \Yii::getPathOfAlias('webroot').'/plugins/'.$parentPlugin.'/'.$relativePathToCss
+                \Yii::getPathOfAlias('webroot') . '/plugins/' . $parentPlugin . '/' . $relativePathToCss
             );
-        } elseif (file_exists(\Yii::app()->getBasePath().'/application/core/plugins/'.$parentPlugin.'/'.$relativePathToCss)) {
+        } elseif (file_exists(\Yii::app()->getBasePath() . '/application/core/plugins/' . $parentPlugin . '/' . $relativePathToCss)) {
             $cssToRegister = \Yii::app()->getAssetManager()->publish(
-                \Yii::app()->getBasePath().'/application/core/plugins/'.$parentPlugin.'/'.$relativePathToCss
+                \Yii::app()->getBasePath() . '/application/core/plugins/' . $parentPlugin . '/' . $relativePathToCss
             );
         }
         \Yii::app()->getClientScript()->registerCssFile($cssToRegister);
+    }
+
+    /**
+     * Returns a health status text to show in plugin overview.
+     * For example, the plugin might be active but not properly configured.
+     * @return string|null
+     */
+    public function getHealthStatusText()
+    {
+        return null;
     }
 }

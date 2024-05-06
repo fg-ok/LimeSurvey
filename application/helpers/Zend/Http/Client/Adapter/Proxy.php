@@ -75,7 +75,7 @@ class Zend_Http_Client_Adapter_Proxy extends Zend_Http_Client_Adapter_Socket
      * @var boolean
      */
     protected $negotiated = false;
-    
+
     /**
      * Stores the last CONNECT handshake request
      *
@@ -164,7 +164,7 @@ class Zend_Http_Client_Adapter_Proxy extends Zend_Http_Client_Adapter_Socket
             foreach ($headers as $k => $v) {
                 if (
                     (string) $k == 'proxy-authorization'
-                    || preg_match("/^proxy-authorization:/i", $v)
+                    || preg_match("/^proxy-authorization:/i", (string) $v)
                 ) {
                     $hasProxyAuthHeader = true;
                     break;
@@ -261,7 +261,7 @@ class Zend_Http_Client_Adapter_Proxy extends Zend_Http_Client_Adapter_Socket
 
         // Process provided headers, including important ones to CONNECT request
         foreach ($headers as $k => $v) {
-            switch (strtolower(substr($v, 0, strpos($v, ':')))) {
+            switch (strtolower(substr((string) $v, 0, strpos((string) $v, ':')))) {
                 case 'proxy-authorization':
                     // break intentionally omitted
 
@@ -274,7 +274,7 @@ class Zend_Http_Client_Adapter_Proxy extends Zend_Http_Client_Adapter_Socket
             }
         }
         $request .= "\r\n";
-        
+
         // @see ZF-3189
         $this->connectHandshakeRequest = $request;
 

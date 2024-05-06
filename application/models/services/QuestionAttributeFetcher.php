@@ -5,7 +5,6 @@ namespace LimeSurvey\Models\Services;
 /**
  * Fetches question attribute definitions from the available providers
  */
-
 class QuestionAttributeFetcher
 {
     /** @var \Question the question where the attributes should apply */
@@ -56,9 +55,9 @@ class QuestionAttributeFetcher
         }
 
         // Sort by category
-        uasort($allAttributes, 'categorySort');
+        $sortedAttributes = $questionAttributeHelper->sortAttributesByCategory($allAttributes);
 
-        return $allAttributes;
+        return $sortedAttributes;
     }
 
     /**
@@ -84,15 +83,25 @@ class QuestionAttributeFetcher
             return $attributeDefinitions;
         }
 
-        $survey = $this->question->survey;
-        if (empty($survey)) {
-            throw new \Exception(gT(sprintf('This question has no survey - qid = %s', json_encode($this->question->qid))));
+        static $survey = null;
+        if ($survey === null) {
+            $survey = $this->question->survey;
+        }
+        if (isset($survey->sid) && $survey->sid !== $this->question->sid) {
+            $survey = $this->question->survey;
+        }
+        if ($survey === null) {
+            throw new \Exception(sprintf('This question has no survey - qid = %s', json_encode($this->question->qid)));
         }
 
         $questionAttributeHelper = new QuestionAttributeHelper();
 
         // Get attribute values
-        $attributeValues = \QuestionAttribute::model()->getAttributesAsArrayFromDB($this->question->qid);
+        if (!empty($this->question->qid)) {
+            $attributeValues = \QuestionAttribute::model()->getAttributesAsArrayFromDB($this->question->qid);
+        } else {
+            $attributeValues = $questionAttributeHelper->getUserDefaultsForQuestionType($this->question->type);
+        }
 
         // Fill attributes with values
         $languages = is_null($language) ? $survey->allLanguages : [$language];

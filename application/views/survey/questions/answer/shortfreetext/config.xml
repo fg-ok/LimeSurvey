@@ -7,8 +7,8 @@
         <type>question_theme</type>
         <title>Short free text</title>
         <creationDate>09/08/2018</creationDate>
-        <author>Dominik Vitt</author>
-        <authorEmail>dominik.vitt@limesurvey.org</authorEmail>
+        <author>LimeSurvey GmbH</author>
+        <authorEmail>info@limesurvey.org</authorEmail>
         <authorUrl>http://www.limesurvey.org</authorUrl>
         <copyright>Copyright (C) 2005 - 2018 LimeSurvey Gmbh, Inc. All rights reserved.</copyright>
         <license>GNU General Public License version 2 or later</license>
@@ -254,6 +254,7 @@
             <sortorder>200</sortorder>
             <inputtype>textarea</inputtype>
             <expression>2</expression>
+            <xssfilter>0</xssfilter>
             <help>Enter a boolean equation to validate the whole question.</help>
             <caption>Question validation equation</caption>
             <i18n></i18n>
@@ -653,7 +654,7 @@
             <readonly_when_active></readonly_when_active>
         </attribute>
         <!-- Timer Attributes END -->
-        <!-- Input Atributes START -->
+        <!-- Input Attributes START -->
         <attribute>
             <name>maximum_chars</name>
             <category>Input</category>
@@ -667,8 +668,8 @@
             <readonly_when_active></readonly_when_active>
             <expression></expression>
         </attribute>
-        <!-- Input Atributes END -->
-        <!-- Location Atributes START -->
+        <!-- Input Attributes END -->
+        <!-- Location Attributes START -->
         <attribute>
             <name>location_mapservice</name>
             <category>Location</category>
@@ -862,7 +863,7 @@
             <readonly_when_active></readonly_when_active>
             <expression></expression>
         </attribute>
-        <!-- Location Atributes END -->
+        <!-- Location Attributes END -->
     </attributes>
 
     <!-- Core question js/css configuration -->

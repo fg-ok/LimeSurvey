@@ -47,6 +47,8 @@
  */
 class SurveyLanguageSetting extends LSActiveRecord
 {
+    private $oldSurveyId;
+    private $oldAlias;
 
     /** @inheritdoc */
     public function tableName()
@@ -64,10 +66,10 @@ class SurveyLanguageSetting extends LSActiveRecord
      * @inheritdoc
      * @return SurveyLanguageSetting
      */
-    public static function model($class = __CLASS__)
+    public static function model($className = __CLASS__)
     {
         /** @var self $model */
-        $model = parent::model($class);
+        $model = parent::model($className);
         return $model;
     }
 
@@ -127,10 +129,15 @@ class SurveyLanguageSetting extends LSActiveRecord
             array('surveyls_policy_error', 'LSYii_Validators'),
             array('surveyls_policy_notice_label', 'LSYii_Validators'),
             array('surveyls_policy_notice_label', 'length', 'min' => 0, 'max' => 192),
-            array('surveyls_url', 'filter', 'filter' => 'trim'),
+            array('surveyls_url', 'LSYii_FilterValidator', 'filter' => 'trim', 'skipOnEmpty' => true),
             array('surveyls_url', 'LSYii_Validators', 'isUrl' => true),
             array('surveyls_urldescription', 'LSYii_Validators'),
             array('surveyls_urldescription', 'length', 'min' => 0, 'max' => 255),
+            array('surveyls_alias', 'length', 'min' => 0, 'max' => 100),
+            array('surveyls_alias', 'match', 'allowEmpty' => true, 'pattern' => '/^[^\d\W][\w\-]*$/u'), // Match alphanumeric strings, including "-" and unicode characters. Cannot be completely numeric.
+            array('surveyls_alias', 'checkAliasUniqueness'),
+            array('surveyls_alias', 'LSYii_ShortUrlValidator'),
+            array('surveyls_alias', 'LSYii_Validators'), // The regex rule shouldn't allow any XSS, but we add LSYii_Validators to be sure.
 
             array('surveyls_dateformat', 'numerical', 'integerOnly' => true, 'min' => '1', 'max' => '12', 'allowEmpty' => true),
             array('surveyls_numberformat', 'numerical', 'integerOnly' => true, 'min' => '0', 'max' => '1', 'allowEmpty' => true),
@@ -141,7 +148,7 @@ class SurveyLanguageSetting extends LSActiveRecord
 
     /**
      * @inheritdoc
-     * Pass this to all findAll query : indexed by surveyls_language : return only one survey id
+     * Pass this to all findAll query : indexed by surveyls_language : return only one survey ID
      * @see https://www.yiiframework.com/doc/api/1.1/CActiveRecord#defaultScope-detail
      * Remind to use resetScope if you need to disable this behaviour
      * @see https://www.yiiframework.com/doc/api/1.1/CActiveRecord#resetScope-detail
@@ -276,7 +283,7 @@ class SurveyLanguageSetting extends LSActiveRecord
      * @param bool $xssfiltering
      * @return bool
      */
-    function updateRecord($data, $condition = '', $xssfiltering = false)
+    public function updateRecord($data, $condition = '', $xssfiltering = false)
     {
         $record = $this->findByPk($condition);
         foreach ($data as $key => $value) {
@@ -291,12 +298,65 @@ class SurveyLanguageSetting extends LSActiveRecord
      * @param array $data
      * @return bool
      */
-    function insertSomeRecords($data)
+    public function insertSomeRecords($data)
     {
         $lang = new self();
         foreach ($data as $k => $v) {
             $lang->$k = $v;
         }
         return $lang->save();
+    }
+
+    /**
+     * Validates that the alias is not used in another survey
+     */
+    public function checkAliasUniqueness()
+    {
+        if (empty($this->surveyls_alias)) {
+            return;
+        }
+        if ($this->surveyls_alias !== $this->oldAlias || $this->surveyls_survey_id != $this->oldSurveyId) {
+            $model = self::model()->find(
+                'surveyls_alias = ? AND surveyls_survey_id <> ?',
+                [$this->surveyls_alias, $this->surveyls_survey_id]
+            );
+            if ($model != null) {
+                $this->addError('surveyls_alias', gT('Alias must be unique'));
+            }
+        }
+    }
+
+    protected function afterFind()
+    {
+        parent::afterFind();
+        $this->oldSurveyId = $this->surveyls_survey_id;
+        if (isset($this->surveyls_alias)) {
+            $this->oldAlias = $this->surveyls_alias;
+        }
+    }
+
+    /**
+     * Returns the array of email attachments data without exposing sensitive paths
+     * @return array<string,array<string,mixed>>
+     */
+    public function getAttachmentsData()
+    {
+        if (empty($this->attachments)) {
+            return [];
+        }
+        $attachments = unserialize($this->attachments);
+        if (is_array($attachments)) {
+            $uploadDir = realpath(Yii::app()->getConfig('uploaddir'));
+            foreach ($attachments as &$template) {
+                foreach ($template as &$attachment) {
+                    if (substr($attachment['url'], 0, strlen($uploadDir)) == $uploadDir) {
+                        $url = substr($attachment['url'], strlen($uploadDir));
+                        $url = ltrim($url, "/\\");
+                        $attachment['url'] = $url;
+                    }
+                }
+            }
+        }
+        return $attachments;
     }
 }

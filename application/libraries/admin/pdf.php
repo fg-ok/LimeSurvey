@@ -1,4 +1,5 @@
 <?php
+
 /*
 * LimeSurvey
 * Copyright (C) 2007-2011 The LimeSurvey Project Team / Carsten Schmitz
@@ -17,112 +18,112 @@ if (!defined('K_TCPDF_EXTERNAL_CONFIG')) {
 }
 
 # include TCPDF
-require(APPPATH.'config/tcpdf'.EXT);
+require(APPPATH . 'config/tcpdf' . EXT);
 
 /**
 * page format
 */
-(!defined('PDF_PAGE_FORMAT')) ? (define('PDF_PAGE_FORMAT', isset($tcpdf['page_format']) ? $tcpdf['page_format'] : 'A4')) : '';
+(!defined('PDF_PAGE_FORMAT')) ? (define('PDF_PAGE_FORMAT', $tcpdf['page_format'] ?? 'A4')) : '';
 
 /**
 * page orientation (P=portrait, L=landscape)
 */
-(!defined('PDF_PAGE_ORIENTATION')) ? (define('PDF_PAGE_ORIENTATION', isset($tcpdf['page_orientation']) ? $tcpdf['page_orientation'] : 'P')) : '';
+(!defined('PDF_PAGE_ORIENTATION')) ? (define('PDF_PAGE_ORIENTATION', $tcpdf['page_orientation'] ?? 'P')) : '';
 
 /**
 * document creator
 */
-(!defined('PDF_CREATOR')) ? (define('PDF_CREATOR', isset($tcpdf['creator']) ? $tcpdf['creator'] : 'TCPDF')) : '';
+(!defined('PDF_CREATOR')) ? (define('PDF_CREATOR', $tcpdf['creator'] ?? 'TCPDF')) : '';
 
 /**
 * document author
 */
-(!defined('PDF_AUTHOR')) ? (define('PDF_AUTHOR', isset($tcpdf['author']) ? $tcpdf['author'] : 'TCPDF')) : '';
+(!defined('PDF_AUTHOR')) ? (define('PDF_AUTHOR', $tcpdf['author'] ?? 'TCPDF')) : '';
 
 /**
 * header title
 */
-(!defined('PDF_HEADER_TITLE')) ? (define('PDF_HEADER_TITLE', isset($tcpdf['header_title']) ? $tcpdf['header_title'] : 'TCPDF Example')) : '';
+(!defined('PDF_HEADER_TITLE')) ? (define('PDF_HEADER_TITLE', $tcpdf['header_title'] ?? 'TCPDF Example')) : '';
 
 /**
 * header description string
 */
-(!defined('PDF_HEADER_STRING')) ? (define('PDF_HEADER_STRING', isset($tcpdf['header_string']) ? $tcpdf['header_string'] : "by Nicola Asuni - Tecnick.com\nwww.tcpdf.org")) : '';
+(!defined('PDF_HEADER_STRING')) ? (define('PDF_HEADER_STRING', $tcpdf['header_string'] ?? "by Nicola Asuni - Tecnick.com\nwww.tcpdf.org")) : '';
 
 /**
 * image logo
 */
-(!defined('PDF_HEADER_LOGO')) ? (define('PDF_HEADER_LOGO', isset($tcpdf['header_logo']) ? $tcpdf['header_logo'] : 'tcpdf_logo.jpg')) : '';
+(!defined('PDF_HEADER_LOGO')) ? (define('PDF_HEADER_LOGO', $tcpdf['header_logo'] ?? 'tcpdf_logo.jpg')) : '';
 
 /**
 * header logo image width [mm]
 */
-(!defined('PDF_HEADER_LOGO_WIDTH')) ? (define('PDF_HEADER_LOGO_WIDTH', isset($tcpdf['header_logo_width']) ? $tcpdf['header_logo_width'] : 30)) : '';
+(!defined('PDF_HEADER_LOGO_WIDTH')) ? (define('PDF_HEADER_LOGO_WIDTH', $tcpdf['header_logo_width'] ?? 30)) : '';
 
 /**
 *  document unit of measure [pt=point, mm=millimeter, cm=centimeter, in=inch]
 */
-(!defined('PDF_UNIT')) ? (define('PDF_UNIT', isset($tcpdf['page_unit']) ? $tcpdf['page_unit'] : 'mm')) : '';
+(!defined('PDF_UNIT')) ? (define('PDF_UNIT', $tcpdf['page_unit'] ?? 'mm')) : '';
 
 /**
 * header margin
 */
-(!defined('PDF_MARGIN_HEADER')) ? (define('PDF_MARGIN_HEADER', isset($tcpdf['header_margin']) ? $tcpdf['header_margin'] : 5)) : '';
+(!defined('PDF_MARGIN_HEADER')) ? (define('PDF_MARGIN_HEADER', $tcpdf['header_margin'] ?? 5)) : '';
 
 /**
 * footer margin
 */
-(!defined('PDF_MARGIN_FOOTER')) ? (define('PDF_MARGIN_FOOTER', isset($tcpdf['footer_margin']) ? $tcpdf['footer_margin'] : 10)) : '';
+(!defined('PDF_MARGIN_FOOTER')) ? (define('PDF_MARGIN_FOOTER', $tcpdf['footer_margin'] ?? 10)) : '';
 
 /**
 * top margin
 */
-(!defined('PDF_MARGIN_TOP')) ? (define('PDF_MARGIN_TOP', isset($tcpdf['margin_top']) ? $tcpdf['margin_top'] : 27)) : '';
+(!defined('PDF_MARGIN_TOP')) ? (define('PDF_MARGIN_TOP', $tcpdf['margin_top'] ?? 27)) : '';
 
 /**
 * bottom margin
 */
-(!defined('PDF_MARGIN_BOTTOM')) ? (define('PDF_MARGIN_BOTTOM', isset($tcpdf['margin_bottom']) ? $tcpdf['margin_bottom'] : 25)) : '';
+(!defined('PDF_MARGIN_BOTTOM')) ? (define('PDF_MARGIN_BOTTOM', $tcpdf['margin_bottom'] ?? 25)) : '';
 
 /**
 * left margin
 */
-(!defined('PDF_MARGIN_LEFT')) ? (define('PDF_MARGIN_LEFT', isset($tcpdf['margin_left']) ? $tcpdf['margin_left'] : 15)) : '';
+(!defined('PDF_MARGIN_LEFT')) ? (define('PDF_MARGIN_LEFT', $tcpdf['margin_left'] ?? 15)) : '';
 
 /**
 * right margin
 */
-(!defined('PDF_MARGIN_RIGHT')) ? (define('PDF_MARGIN_RIGHT', isset($tcpdf['margin_right']) ? $tcpdf['margin_right'] : 15)) : '';
+(!defined('PDF_MARGIN_RIGHT')) ? (define('PDF_MARGIN_RIGHT', $tcpdf['margin_right'] ?? 15)) : '';
 
 /**
 * default main font name
 */
-(!defined('PDF_FONT_NAME_MAIN')) ? (define('PDF_FONT_NAME_MAIN', isset($tcpdf['page_font']) ? $tcpdf['page_font'] : 'helvetica')) : '';
+(!defined('PDF_FONT_NAME_MAIN')) ? (define('PDF_FONT_NAME_MAIN', $tcpdf['page_font'] ?? 'helvetica')) : '';
 
 /**
 * default main font size
 */
-(!defined('PDF_FONT_SIZE_MAIN')) ? (define('PDF_FONT_SIZE_MAIN', isset($tcpdf['page_font_size']) ? $tcpdf['page_font_size'] : 10)) : '';
+(!defined('PDF_FONT_SIZE_MAIN')) ? (define('PDF_FONT_SIZE_MAIN', $tcpdf['page_font_size'] ?? 10)) : '';
 
 /**
 * default data font name
 */
-(!defined('PDF_FONT_NAME_DATA')) ? (define('PDF_FONT_NAME_DATA', isset($tcpdf['data_font']) ? $tcpdf['data_font'] : 'helvetica')) : '';
+(!defined('PDF_FONT_NAME_DATA')) ? (define('PDF_FONT_NAME_DATA', $tcpdf['data_font'] ?? 'helvetica')) : '';
 
 /**
 * default data font size
 */
-(!defined('PDF_FONT_SIZE_DATA')) ? (define('PDF_FONT_SIZE_DATA', isset($tcpdf['data_font_size']) ? $tcpdf['data_font_size'] : 8)) : '';
+(!defined('PDF_FONT_SIZE_DATA')) ? (define('PDF_FONT_SIZE_DATA', $tcpdf['data_font_size'] ?? 8)) : '';
 
 /**
 * default monospaced font name
 */
-(!defined('PDF_FONT_MONOSPACED')) ? (define('PDF_FONT_MONOSPACED', isset($tcpdf['mono_font']) ? $tcpdf['mono_font'] : 'courier')) : '';
+(!defined('PDF_FONT_MONOSPACED')) ? (define('PDF_FONT_MONOSPACED', $tcpdf['mono_font'] ?? 'courier')) : '';
 
 /**
 * ratio used to adjust the conversion of pixels to user units
 */
-(!defined('PDF_IMAGE_SCALE_RATIO')) ? (define('PDF_IMAGE_SCALE_RATIO', isset($tcpdf['image_scale']) ? $tcpdf['image_scale'] : 1.25)) : '';
+(!defined('PDF_IMAGE_SCALE_RATIO')) ? (define('PDF_IMAGE_SCALE_RATIO', $tcpdf['image_scale'] ?? 1.25)) : '';
 
 /**
 * magnification factor for titles
@@ -132,7 +133,7 @@ require(APPPATH.'config/tcpdf'.EXT);
 /**
 * height of cell repect font height
 */
-(!defined('K_CELL_HEIGHT_RATIO')) ? (define('K_CELL_HEIGHT_RATIO', isset($tcpdf['cell_height_ratio']) ? $tcpdf['cell_height_ratio'] : 1.25)) : '';
+(!defined('K_CELL_HEIGHT_RATIO')) ? (define('K_CELL_HEIGHT_RATIO', $tcpdf['cell_height_ratio'] ?? 1.25)) : '';
 
 /**
 * title magnification respect main font size
@@ -142,20 +143,18 @@ require(APPPATH.'config/tcpdf'.EXT);
 /**
 * reduction factor for small font
 */
-(!defined('K_SMALL_RATIO')) ? (define('K_SMALL_RATIO', isset ($tcpdf['small_font_ratio']) ? $tcpdf['small_font_ratio'] : 2 / 3)) : '';
+(!defined('K_SMALL_RATIO')) ? (define('K_SMALL_RATIO', $tcpdf['small_font_ratio'] ?? 2 / 3)) : '';
 
 /**
 * set to true to enable the special procedure used to avoid the overlapping of symbols on Thai language
 */
-(!defined('K_THAI_TOPCHARS')) ? (define('K_THAI_TOPCHARS', isset($tcpdf['thai_top_chars']) ? $tcpdf['thai_top_chars'] : true)) : '';
+(!defined('K_THAI_TOPCHARS')) ? (define('K_THAI_TOPCHARS', $tcpdf['thai_top_chars'] ?? true)) : '';
 
 /**
 * if true allows to call TCPDF methods using HTML syntax
 * IMPORTANT: For security reason, disable this feature if you are printing user HTML content.
 */
-(!defined('K_TCPDF_CALLS_IN_HTML')) ? (define('K_TCPDF_CALLS_IN_HTML', isset($tcpdf['tcpdf_in_html']) ? $tcpdf['tcpdf_in_html'] : true)) : '';
-
-require_once($tcpdf['base_directory'].'/tcpdf.php');
+(!defined('K_TCPDF_CALLS_IN_HTML')) ? (define('K_TCPDF_CALLS_IN_HTML', $tcpdf['tcpdf_in_html'] ?? true)) : '';
 
 
 /************************************************************
@@ -177,13 +176,13 @@ class pdf extends TCPDF
      * @access private
      */
     private $cfg_constant_map = array(
-        'K_PATH_MAIN'	=> 'base_directory',
-        'K_PATH_URL'	=> 'base_url',
-        'K_PATH_FONTS'	=> 'fonts_directory',
-        'K_PATH_CACHE'	=> 'cache_directory',
-        'K_PATH_IMAGES'	=> 'image_directory',
+        'K_PATH_MAIN'   => 'base_directory',
+        'K_PATH_URL'    => 'base_url',
+        'K_PATH_FONTS'  => 'fonts_directory',
+        'K_PATH_CACHE'  => 'cache_directory',
+        'K_PATH_IMAGES' => 'image_directory',
         'K_BLANK_IMAGE' => 'blank_image',
-        'K_SMALL_RATIO'	=> 'small_font_ratio',
+        'K_SMALL_RATIO' => 'small_font_ratio',
     );
 
 
@@ -239,7 +238,7 @@ class pdf extends TCPDF
     {
 
         # load the config file
-        require(APPPATH.'config/tcpdf'.EXT);
+        require(APPPATH . 'config/tcpdf' . EXT);
         $this->_config = $tcpdf;
         unset($tcpdf);
 
@@ -272,10 +271,10 @@ class pdf extends TCPDF
         $this->setHeaderMargin($this->_config['header_margin']);
         //$this->SetHeaderData();
         //$this->SetHeaderData(
-        //	$this->_config['header_logo'],
-        //	$this->_config['header_logo_width'],
-        //	$this->_config['header_title'],
-        //	$this->_config['header_string']
+        //  $this->_config['header_logo'],
+        //  $this->_config['header_logo_width'],
+        //  $this->_config['header_title'],
+        //  $this->_config['header_string']
         //);
 
         # footer settings
@@ -299,7 +298,6 @@ class pdf extends TCPDF
 
         # image settings
         $this->setImageScale($this->_config['image_scale']);
-
     }
 
     /**
@@ -376,7 +374,7 @@ class pdf extends TCPDF
      *
      * Creates a Table with equal cell width.
      * @param $array - table array( 0=> array("td", "td", "td"),
-     * 								1=> array("td", "td", "td"))
+     *                              1=> array("td", "td", "td"))
      * @param integer $modulo - fills each second row with a light-grey for better visibility. Default is on turn off with 0
      * @return void
      */
@@ -387,12 +385,16 @@ class pdf extends TCPDF
         $arraySize = sizeof($array);
         for ($a = 0; $a < $arraySize; $a++) {
             if ($modulo) {
-                if ($a % 2 === 0) {$fill = 0; } else {$fill = 1; }
-            } else {$fill = 0; }
+                if ($a % 2 === 0) {
+                    $fill = 0;
+                } else {
+                    $fill = 1;
+                }
+            } else {
+                $fill = 0;
+            }
             for ($b = 0; $b < sizeof($array[$a]); $b++) {
-
                 $this->Cell($maxwidth, 4, $this->delete_html($array[$a][$b]), 0, 0, 'L', $fill);
-
             }
             $this->ln();
         }
@@ -402,7 +404,7 @@ class pdf extends TCPDF
      *
      * Creates a table using the full width of page
      * @param $array Table array( 0=> array("td", "td", "td"),
-     * 								1=> array("td", "td", "td"))
+     *                              1=> array("td", "td", "td"))
      * @param $modulo Fills each second row with a light-grey for better visibility. Default is off, turn on with 1
      * @return void
      */
@@ -415,8 +417,14 @@ class pdf extends TCPDF
         $arraySize = sizeof($array);
         for ($a = 0; $a < $arraySize; $a++) {
             if ($modulo) {
-                if ($a % 2 === 0) {$fill = 0; } else {$fill = 1; }
-            } else {$fill = 0; }
+                if ($a % 2 === 0) {
+                    $fill = 0;
+                } else {
+                    $fill = 1;
+                }
+            } else {
+                $fill = 0;
+            }
             $subArraySize = sizeof($array[$a]);
             for ($b = 0; $b < $subArraySize; $b++) {
                 //echo $maxwidth[$b]." max $b.Spalte<br/>";
@@ -431,7 +439,7 @@ class pdf extends TCPDF
      * creates a table with a bold head using the full width of page
      * @param $head - head array( 0=> array("th", "th", "th"))
      * @param $table - table array( 0=> array("td", "td", "td"),
-     * 								1=> array("td", "td", "td"))
+     *                              1=> array("td", "td", "td"))
      * @param $modulo - fills each second row with a light-grey for better visibility. Default is on, turn off with 0
      * @return void
      */
@@ -447,8 +455,14 @@ class pdf extends TCPDF
         $arraySize = sizeof($array);
         for ($a = 0; $a < $arraySize; $a++) {
             if ($modulo) {
-                if ($a % 2 === 0) {$fill = 1; } else {$fill = 0; }
-            } else {$fill = 0; }
+                if ($a % 2 === 0) {
+                    $fill = 1;
+                } else {
+                    $fill = 0;
+                }
+            } else {
+                $fill = 0;
+            }
             for ($b = 0; $b < sizeof($array[$a]); $b++) {
                 $bEndOfCell = 0;
                 if ($b == sizeof($array[$a]) - 1) {
@@ -499,7 +513,7 @@ class pdf extends TCPDF
         for ($i = 0; $i < $arraySize; $i++) {
             for ($j = 0; $j < sizeof($array[$i]); $j++) {
                 $stringWidth = 0;
-                $chars = str_split($this->delete_html($array[$i][$j]), 1);
+                $chars = str_split((string) $this->delete_html($array[$i][$j]), 1);
                 foreach ($chars as $char) {
                     $stringWidth = $stringWidth + $this->GetCharWidth($char);
 
@@ -521,11 +535,11 @@ class pdf extends TCPDF
         for ($i = 0; $i < $arraySize; $i++) {
             for ($j = 0; $j < sizeof($array[$i]); $j++) {
                 if (($i - 1) >= 0) {
-                    if (strlen($this->delete_html($array[($i - 1)][$j])) < strlen($this->delete_html($array[$i][$j]))) {
-                        $width[$j] = strlen($this->delete_html($array[$i][$j]));
+                    if (strlen((string) $this->delete_html($array[($i - 1)][$j])) < strlen((string) $this->delete_html($array[$i][$j]))) {
+                        $width[$j] = strlen((string) $this->delete_html($array[$i][$j]));
                     }
                 } else {
-                    $width[$j] = strlen($this->delete_html($array[$i][$j]));
+                    $width[$j] = strlen((string) $this->delete_html($array[$i][$j]));
                 }
             }
         }
@@ -590,7 +604,7 @@ class pdf extends TCPDF
 
     public function delete_html($text)
     {
-        $text = html_entity_decode($text, null, 'UTF-8');
+        $text = html_entity_decode((string) $text, null, 'UTF-8');
         $text = str_replace("\t", ' ', $text);
         return strip_tags($text);
     }
@@ -637,24 +651,23 @@ class pdf extends TCPDF
      */
     public function addTitle($sTitle, $sSubtitle = "")
     {
-      if (getGlobalSetting('pdfshowsurveytitle') == 'Y') {
-        if (!empty($sTitle)) {
-            $this->ln(1);
-            $this->SetFontSize($this->_ibaseAnswerFontSize + 6);
-            $oPurifier = new CHtmlPurifier();
-            $sTitleHTML = html_entity_decode(stripJavaScript($oPurifier->purify($sTitle)), ENT_COMPAT);
-            $this->WriteHTMLCell(0, $this->_iCellHeight, $this->getX(), $this->getY(), $sTitleHTML, 0, 1, false, true, 'C');
-            if (!empty($sSubtitle)) {
+        if (getGlobalSetting('pdfshowsurveytitle') == 'Y') {
+            if (!empty($sTitle)) {
                 $this->ln(1);
-                $this->SetFontSize($this->_ibaseAnswerFontSize + 2);
-                $sSubtitleHTML = html_entity_decode(stripJavaScript($oPurifier->purify($sSubtitle)), ENT_COMPAT);
-                $this->WriteHTMLCell(0, $this->_iCellHeight, $this->getX(), $this->getY(), $sSubtitleHTML, 0, 1, false, true, 'C');
+                $this->SetFontSize($this->_ibaseAnswerFontSize + 6);
+                $oPurifier = new CHtmlPurifier();
+                $sTitleHTML = html_entity_decode((string) stripJavaScript($oPurifier->purify($sTitle)), ENT_COMPAT);
+                $this->WriteHTMLCell(0, $this->_iCellHeight, $this->getX(), $this->getY(), $sTitleHTML, 0, 1, false, true, 'C');
+                if (!empty($sSubtitle)) {
+                    $this->ln(1);
+                    $this->SetFontSize($this->_ibaseAnswerFontSize + 2);
+                    $sSubtitleHTML = html_entity_decode((string) stripJavaScript($oPurifier->purify($sSubtitle)), ENT_COMPAT);
+                    $this->WriteHTMLCell(0, $this->_iCellHeight, $this->getX(), $this->getY(), $sSubtitleHTML, 0, 1, false, true, 'C');
+                }
+                $this->ln(6);
+                $this->SetFontSize($this->_ibaseAnswerFontSize);
             }
-            $this->ln(6);
-            $this->SetFontSize($this->_ibaseAnswerFontSize);
         }
-      }
-
     }
 
     /**
@@ -669,7 +682,7 @@ class pdf extends TCPDF
     {
 
         $oTemplate = Template::getLastInstance();
-        $sLogoFileName = $oTemplate->filesPath.Yii::app()->getConfig('pdflogofile');
+        $sLogoFileName = $oTemplate->filesPath . Yii::app()->getConfig('pdflogofile');
         if (!file_exists($sLogoFileName)) {
             $sLogoFileName = '';
         }
@@ -685,12 +698,13 @@ class pdf extends TCPDF
             }
 
             $this->SetHeaderData($sLogoFileName, Yii::app()->getConfig('pdflogowidth'), $sHeaderTitle, $sHeaderString);
-            $this->SetHeaderFont(Array($aPdfLanguageSettings['pdffont'], '', $this->_ibaseAnswerFontSize - 2));
-            $this->SetFooterFont(Array($aPdfLanguageSettings['pdffont'], '', $this->_ibaseAnswerFontSize - 2));
+            $this->SetHeaderFont(array($aPdfLanguageSettings['pdffont'], '', $this->_ibaseAnswerFontSize - 2));
+            $this->SetFooterFont(array($aPdfLanguageSettings['pdffont'], '', $this->_ibaseAnswerFontSize - 2));
         }
     }
 
-    public function Header() {
+    public function Header()
+    {
         if ($this->header_xobjid === false) {
             // start a new XObject Template
             $this->header_xobjid = $this->startTemplate($this->w, $this->tMargin);
@@ -703,9 +717,9 @@ class pdf extends TCPDF
                 $this->x = $this->original_lMargin;
             }
 
-            if (($headerdata['logo']) AND ($headerdata['logo'] != K_BLANK_IMAGE)) {
-                $imgtype = TCPDF_IMAGES::getImageFileType(K_PATH_IMAGES.$headerdata['logo']);
-                if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
+            if (($headerdata['logo']) and ($headerdata['logo'] != K_BLANK_IMAGE)) {
+                $imgtype = TCPDF_IMAGES::getImageFileType(K_PATH_IMAGES . $headerdata['logo']);
+                if (($imgtype == 'eps') or ($imgtype == 'ai')) {
                     $this->ImageEps($headerdata['logo'], '', '', $headerdata['logo_width']);
                 } elseif ($imgtype == 'svg') {
                     $this->ImageSVG($headerdata['logo'], '', '', $headerdata['logo_width']);
@@ -747,7 +761,7 @@ class pdf extends TCPDF
         // print header template
         $x = 0;
         $dx = 0;
-        if (!$this->header_xobj_autoreset AND $this->booklet AND (($this->page % 2) == 0)) {
+        if (!$this->header_xobj_autoreset and $this->booklet and (($this->page % 2) == 0)) {
             // adjust margins for booklet mode
             $dx = ($this->original_lMargin - $this->original_rMargin);
         }
@@ -774,8 +788,8 @@ class pdf extends TCPDF
     public function addGidAnswer($sGroupName, $sGroupDescription, $bAllowBreakPage = false)
     {
         $oPurifier = new CHtmlPurifier();
-        $sGroupName = html_entity_decode(stripJavaScript($oPurifier->purify($sGroupName)), ENT_COMPAT);
-        $sGroupDescription = html_entity_decode(stripJavaScript($oPurifier->purify($sGroupDescription)), ENT_COMPAT);
+        $sGroupName = html_entity_decode((string) stripJavaScript($oPurifier->purify($sGroupName)), ENT_COMPAT);
+        $sGroupDescription = html_entity_decode((string) stripJavaScript($oPurifier->purify($sGroupDescription)), ENT_COMPAT);
         $sData['thissurvey'] = $this->_aSurveyInfo;
         $sGroupName = templatereplace($sGroupName, array(), $sData, '', $this->_aSurveyInfo['anonymized'] == "Y", null, array(), true);
         $sGroupDescription = templatereplace($sGroupDescription, array(), $sData, '', $this->_aSurveyInfo['anonymized'] == "Y", null, array(), true);
@@ -832,7 +846,7 @@ class pdf extends TCPDF
 
         $oPurifier = new CHtmlPurifier();
         $sQuestionHTML = str_replace('-oth-', '', $sQuestion); // Copied from Writer::stripTagsFull. Really necessary?
-        $sQuestionHTML = html_entity_decode(stripJavaScript($oPurifier->purify($sQuestionHTML)), ENT_COMPAT);
+        $sQuestionHTML = html_entity_decode((string) stripJavaScript($oPurifier->purify($sQuestionHTML)), ENT_COMPAT);
         if ($bReplaceExpressions) {
             $sData = array();
             $sData['thissurvey'] = $this->_aSurveyInfo;

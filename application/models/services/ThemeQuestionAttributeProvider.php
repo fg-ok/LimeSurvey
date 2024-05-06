@@ -41,12 +41,12 @@ class ThemeQuestionAttributeProvider extends QuestionAttributeProvider
 
         $questionTheme = \QuestionTheme::model()->findByAttributes([], 'name = :name AND extends = :extends', ['name' => $questionThemeName, 'extends' => $questionType]);
         if ($questionTheme !== null) {
-            $xmlFilePath = $questionTheme['xml_path'] . '/config.xml';
+            $xmlFilePath = $questionTheme->getXmlPath() . '/config.xml';
             $extensionConfig = \ExtensionConfig::loadFromFile($xmlFilePath);
-            $xmlAttributes = $extensionConfig->getNodeAsArray('attributes');
         }
 
-        if (!empty($xmlAttributes)) {
+        if (!empty($extensionConfig)) {
+            $xmlAttributes = $extensionConfig->getNodeAsArray('attributes');
             if (!empty($xmlAttributes['attribute']['name'])) {
                 // Only one attribute set in config: need an array of attributes
                 $xmlAttributes['attribute'] = array($xmlAttributes['attribute']);

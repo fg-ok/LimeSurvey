@@ -35,6 +35,8 @@ class QuestionAttribute extends LSActiveRecord
 {
     protected static $questionAttributesSettings = array();
 
+    protected $xssFilterAttributes = ['value'];
+
     /**
      * @return static
      */
@@ -79,13 +81,13 @@ class QuestionAttribute extends LSActiveRecord
     {
         return array('index' => 'attribute');
     }
-    
+
     /** @inheritdoc */
     public function rules()
     {
         return array(
             array('qid,attribute', 'required'),
-            array('value', 'LSYii_Validators'),
+            array('value', 'filterXss'),
             array('language', 'LSYii_Validators', 'isLanguage' => true)
         );
     }
@@ -104,7 +106,10 @@ class QuestionAttribute extends LSActiveRecord
         $oModel = new self();
         $aResult = $oModel->findAll('attribute=:attributeName and qid=:questionID and language=:language', array(':attributeName' => $sAttributeName, ':language' => $sLanguage, ':questionID' => $iQuestionID));
         if (!empty($aResult)) {
-            $oModel->updateAll(array('value' => $sValue), 'attribute=:attributeName and qid=:questionID and language=:language', array(':attributeName' => $sAttributeName, ':language' => $sLanguage, ':questionID' => $iQuestionID));
+            foreach ($aResult as $questionAttribute) {
+                $questionAttribute->value = $sValue;
+                $questionAttribute->save();
+            }
         } else {
             $oModel = new self();
             $oModel->attribute = $sAttributeName;
@@ -116,7 +121,7 @@ class QuestionAttribute extends LSActiveRecord
         return Yii::app()->db->createCommand()
             ->select()
             ->from($this->tableName())
-            ->where(array('and', 'qid=:qid'))->bindParam(":qid", $qid)
+            ->where(array('and', 'qid=:qid'))->bindParam(":qid", $iQuestionID)
             ->order('qaid asc')
             ->query();
     }
@@ -133,7 +138,10 @@ class QuestionAttribute extends LSActiveRecord
         $oModel = new self();
         $aResult = $oModel->findAll('attribute=:attributeName and qid=:questionID', array(':attributeName' => $sAttributeName, ':questionID' => $iQuestionID));
         if (!empty($aResult)) {
-            $oModel->updateAll(array('value' => $sValue), 'attribute=:attributeName and qid=:questionID', array(':attributeName' => $sAttributeName, ':questionID' => $iQuestionID));
+            foreach ($aResult as $questionAttribute) {
+                $questionAttribute->value = $sValue;
+                $questionAttribute->save();
+            }
         } else {
             $oModel = new self();
             $oModel->attribute = $sAttributeName;
@@ -144,7 +152,7 @@ class QuestionAttribute extends LSActiveRecord
         return Yii::app()->db->createCommand()
             ->select()
             ->from($this->tableName())
-            ->where(array('and', 'qid=:qid'))->bindParam(":qid", $qid)
+            ->where(array('and', 'qid=:qid'))->bindParam(":qid", $iQuestionID)
             ->order('qaid asc')
             ->query();
     }
@@ -155,10 +163,10 @@ class QuestionAttribute extends LSActiveRecord
      * NOTE: We can't use self::setQuestionAttribute() because it doesn't check for question types first.
      * TODO: the question type check should be done via rules, or via a call to a question method
      *
-     * @var integer $iSid                   the sid to update  (only to check permission)
-     * @var array $aQids                    an array containing the list of primary keys for questions
-     * @var array $aAttributesToUpdate    array continaing the list of attributes to update
-     * @var array $aValidQuestionTypes    the question types we can update for those attributes
+     * @param integer $iSid                   the sid to update  (only to check permission)
+     * @param array $aQids                    an array containing the list of primary keys for questions
+     * @param array $aAttributesToUpdate    array containing the list of attributes to update
+     * @param array $aValidQuestionTypes    the question types we can update for those attributes
      * @todo Missign noun in function name - set multiple what?
      */
     public function setMultiple($iSid, $aQids, $aAttributesToUpdate, $aValidQuestionTypes)
@@ -176,14 +184,17 @@ class QuestionAttribute extends LSActiveRecord
                 foreach ($aAttributesToUpdate as $sAttribute) {
                     // TODO: use an array like for a form submit, so we can parse it from the controller instead of using $_POST directly here
                     $sValue = Yii::app()->request->getPost($sAttribute);
-                    $iInsertCount = QuestionAttribute::model()->findAllByAttributes(['attribute' => $sAttribute, 'qid' => $iQid]);
+                    $questionAttributes = QuestionAttribute::model()->findAllByAttributes(['attribute' => $sAttribute, 'qid' => $iQid]);
 
                     // We check if we can update this attribute for this question type
                     // TODO: if (in_array($oQuestion->attributes, $sAttribute))
                     if (in_array($oQuestion->type, $aValidQuestionTypes)) {
-                        if (count($iInsertCount) > 0) {
+                        if (count($questionAttributes) > 0) {
                             // Update
-                            QuestionAttribute::model()->updateAll(['value' => $sValue], 'attribute=:attribute AND qid=:qid', [':attribute' => $sAttribute, ':qid' => $iQid]);
+                            foreach ($questionAttributes as $questionAttribute) {
+                                $questionAttribute->value = $sValue;
+                                $questionAttribute->save();
+                            }
                         } else {
                             // Create
                             $oAttribute = new QuestionAttribute();
@@ -208,16 +219,21 @@ class QuestionAttribute extends LSActiveRecord
      * --prepare an easier/smaller array to return
      *
      * @access public
-     * @param int $iQuestionID
+     * @param int|Question $q
      * @param string $sLanguage restrict to this language (if null $oQuestion->survey->allLanguages will be used)
      * @return array|false
      *
      * @throws CException throws exception if questiontype is null
      */
-    public function getQuestionAttributes($iQuestionID, $sLanguage = null)
+    public function getQuestionAttributes($q, $sLanguage = null)
     {
+        $receivedIDOnly = (!($q instanceof Question));
+        if ($receivedIDOnly) {
+            $iQuestionID = intval($q);
+        } else {
+            $iQuestionID = $q->qid;
+        }
         static $survey = '';
-        $iQuestionID = (int)$iQuestionID;
         // Limit the size of the attribute cache due to memory usage
         $cacheKey = 'getQuestionAttributes_' . $iQuestionID . '_' . json_encode($sLanguage);
         if (EmCacheHelper::useCache()) {
@@ -227,7 +243,11 @@ class QuestionAttribute extends LSActiveRecord
             }
         }
 
-        $oQuestion = Question::model()->find("qid=:qid", ['qid' => $iQuestionID]);
+        if ($receivedIDOnly) {
+            $oQuestion = Question::model()->find("qid=:qid", ['qid' => $iQuestionID]);
+        } else {
+            $oQuestion = $q;
+        }
         if (empty($oQuestion)) {
             return false; // return false but don't set $aQuestionAttributesStatic[$iQuestionID]
         }
@@ -368,6 +388,9 @@ class QuestionAttribute extends LSActiveRecord
             "readonly" => false,
             "readonly_when_active" => false,
             "expression" => null,
+            "xssfilter" => true,
+            "min" => null, // Used for integer type
+            "max" => null, // Used for integer type
         );
     }
 
@@ -377,7 +400,7 @@ class QuestionAttribute extends LSActiveRecord
      *
      * @param string $sType : type of question (this is the attribute 'question_type' in table question_theme)
      * @param boolean $advancedOnly If true, only fetch advanced attributes
-     * @return array : the attribute settings for this question type
+     * @return array The attribute settings for this question type
      *                 returns values from getGeneralAttributesFromXml and getAdvancedAttributesFromXml if this fails
      *                 getAttributesDefinition and getDefaultSettings are returned
      *
@@ -401,7 +424,7 @@ class QuestionAttribute extends LSActiveRecord
             $attributes = \LimeSurvey\Helpers\questionHelper::getAttributesDefinitions();
             /* Filter to get this question type setting */
             $aQuestionTypeAttributes = array_filter($attributes, function ($attribute) use ($sType) {
-                return stripos($attribute['types'], $sType) !== false;
+                return stripos((string) $attribute['types'], $sType) !== false;
             });
             foreach ($aQuestionTypeAttributes as $attribute => $settings) {
                   self::$questionAttributesSettings[$sType][$attribute] = array_merge(
@@ -424,7 +447,7 @@ class QuestionAttribute extends LSActiveRecord
      * the attribute is missing. In those cases, the deault "core" is used.
      *
      * @return string question_template or 'core' if it not exists
-     * 
+     *
      * @deprecated use $question->question_theme_name instead (Question model)
      */
     public static function getQuestionTemplateValue($questionID)
@@ -465,7 +488,7 @@ class QuestionAttribute extends LSActiveRecord
             }
             if (\PHP_VERSION_ID < 80000) {
                 libxml_disable_entity_loader(true);
-            }            
+            }
         } else {
             return null;
         }
@@ -577,5 +600,40 @@ class QuestionAttribute extends LSActiveRecord
         $result = App()->getPluginManager()->dispatchEvent($event);
 
         return (array) $result->get('questionAttributes');
+    }
+
+    /**
+     * Apply XSS filter to question attribute value unless 'xssfilter' property is false.
+     * @param string $attribute the name of the attribute to be validated.
+     * @param array<mixed> $params additional parameters passed with rule when being executed.
+     * @return void
+     */
+    public function filterXss($attribute, $params)
+    {
+        $question = Question::model()->find("qid=:qid", ['qid' => $this->qid]);
+        if (empty($question)) {
+            return;
+        }
+        $questionAttributeFetcher = new \LimeSurvey\Models\Services\QuestionAttributeFetcher();
+        $questionAttributeFetcher->setQuestion($question);
+        $questionAttributeDefinitions = $questionAttributeFetcher->fetch();
+
+        // The value will be filtered unless the attribute definition has the "xssfilter" property set to false
+        $shouldFilter = true;
+        if (isset($questionAttributeDefinitions[$this->attribute])) {
+            $questionAttributeDefinition = $questionAttributeDefinitions[$this->attribute];
+            if (array_key_exists("xssfilter", $questionAttributeDefinition) && $questionAttributeDefinition['xssfilter'] == false) {
+                $shouldFilter = false;
+            }
+        }
+
+        if (!$shouldFilter) {
+            return;
+        }
+
+        // By default, LSYii_Validators only applies an XSS filter. It has other filters but they are not enabled by default.
+        $validator = new LSYii_Validators();
+        $validator->attributes = [$attribute];
+        $validator->validate($this, [$attribute]);
     }
 }

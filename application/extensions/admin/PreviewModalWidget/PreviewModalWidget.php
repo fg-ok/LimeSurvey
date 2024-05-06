@@ -36,11 +36,11 @@ class PreviewModalWidget extends CWidget
      */
     public $debugKeyCheck = "Key: ";
 
-    /**
+     /**
      * The title of the preview window
      * @var string
      */
-    public $previewWindowTitle = "Preview";
+    public $previewWindowTitle = "";
 
     /**
      * Either a group or an items array must be given
@@ -79,7 +79,7 @@ class PreviewModalWidget extends CWidget
      * If the button should have any extra classes or modifications.
      * @var string[]
      */
-    public $buttonClasses = ['btn-default'];
+    public $buttonClasses = ['btn-outline-secondary'];
 
     /**
      * The position the icon has in the modal button

@@ -19,6 +19,9 @@
  */
 class LSActiveRecord extends CActiveRecord
 {
+    /** @var string[] Array of attributes that should be XSS filtered on mass updates */
+    protected $xssFilterAttributes = [];
+
     public $bEncryption = false;
 
     /**
@@ -212,8 +215,34 @@ class LSActiveRecord extends CActiveRecord
     }
 
     /**
+     * Updates records with the specified condition.
+     * XSS filtering is enforced for attributes listed in model's $xssFilterAttributes property.
+     * See {@link find()} for detailed explanation about $condition and $params.
+     * Note, the attributes are not checked for safety and no validation is done.
+     * @param array $attributes list of attributes (name=>$value) to be updated
+     * @param mixed $condition query condition or criteria.
+     * @param array $params parameters to be bound to an SQL statement.
+     * @return integer the number of rows being updated
+     */
+    public function updateAll($attributes, $condition = '', $params = array())
+    {
+        if (!empty($this->xssFilterAttributes)) {
+            $validator = new LSYii_Validators();
+            if ($validator->xssfilter) {
+                $attributeNames = array_keys($attributes);
+                $attributesToFilter = array_intersect($attributeNames, $this->xssFilterAttributes);
+                foreach ($attributesToFilter as $attribute) {
+                    $attributes[$attribute] = $validator->xssFilter($attributes[$attribute]);
+                }
+            }
+        }
+
+        return parent::updateAll($attributes, $condition, $params);
+    }
+
+    /**
      * Overriding of Yii's findByAttributes method to provide encrypted attribute value search
-     * @param array $attributes list of attribute values (indexed by attribute names) that the active records should match.
+     * @param array $attributes list of attribute values (indexed by attribute names) that the active record should match.
      * An attribute value can be an array which will be used to generate an IN condition.
      * @param mixed $condition query condition or criteria.
      * @param array $params parameters to be bound to an SQL statement.
@@ -370,7 +399,7 @@ class LSActiveRecord extends CActiveRecord
             $sodium = Yii::app()->sodiumOld;
         }
         // if $value is provided, it would decrypt
-        if ($value) {
+        if (isset($value) && $value !== '') {
             try {
                 return $sodium->decrypt($value);
             } catch (throwable $e) {
@@ -395,7 +424,7 @@ class LSActiveRecord extends CActiveRecord
     public static function encryptSingle($value = '')
     {
         // if $value is provided, it would decrypt
-        if (!empty($value)) {
+        if (isset($value) && $value !== "") {
             // load sodium library
             $sodium = Yii::app()->sodium;
             return $sodium->encrypt($value);
@@ -429,7 +458,6 @@ class LSActiveRecord extends CActiveRecord
 
         // encrypt attributes
         $this->decryptEncryptAttributes('encrypt');
-
         // call save() method  without validation, validation is already done ( if needed )
         return $this->save(false);
     }
@@ -476,7 +504,7 @@ class LSActiveRecord extends CActiveRecord
         $encryptionNotice = gT("This field is encrypted and can only be searched by exact match. Please enter the exact value you are looking for.");
         if (isset($encryptedAttributes)) {
             if (in_array($attributeName, $encryptedAttributes)) {
-                return ' <span  data-toggle="tooltip" title="' . $encryptionNotice . '" class="fa fa-key text-success"></span>';
+                return ' <span  data-bs-toggle="tooltip" title="' . $encryptionNotice . '" class="ri-key-2-fill text-success"></span>';
             }
         }
     }

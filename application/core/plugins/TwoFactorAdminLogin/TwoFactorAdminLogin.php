@@ -2,7 +2,7 @@
 
 /**
  * Plugin to enable two factor authentication for LimeSurvey Admin Backend
- * @author Markus FLür | Eddy Lackmann <support@limesurvey.org>
+ * @author LimeSurvey GmbH <info@limesurvey.org>
  * @license GPL 2.0 or later
  */
 
@@ -67,13 +67,13 @@ class TwoFactorAdminLogin extends AuthPluginBase
         ),
         'force2fa' => array(
             'type' => 'select',
-            'label' => 'Force 2FA on login',
+            'label' => 'Prompt to activate 2FA on login',
             'default' => '0',
             'options' => [
                 '0 ' => 'No',
                 '1' => 'Yes',
             ],
-            'help' => 'If this is active any user will be forced to create a 2FA key after first login'
+            'help' => 'Upon login, users who have not enabled two-factor authentication (2FA) will be prompted to set it up.'
         ),
     );
 
@@ -210,7 +210,7 @@ class TwoFactorAdminLogin extends AuthPluginBase
             'isSmallText' => false,
             'label' => gT('General'),
             'href' => $this->api->createUrl('admin/pluginhelper/sa/fullpagewrapper/plugin/TwoFactorAdminLogin/method/userindex', []),
-            'iconClass' => 'fa fa-user-secret',
+            'iconClass' => 'ri-spy-fill',
         ];
 
         $aMenuItems[] = (new \LimeSurvey\Menu\MenuItem($aMenuItemUserOptions));
@@ -221,7 +221,7 @@ class TwoFactorAdminLogin extends AuthPluginBase
                 'isSmallText' => false,
                 'label' => gT('Administration'),
                 'href' => $this->api->createUrl('admin/pluginhelper/sa/fullpagewrapper/plugin/TwoFactorAdminLogin/method/index', []),
-                'iconClass' => 'fa fa-users',
+                'iconClass' => 'ri-group-fill',
             ];
             $aMenuItems[] = (new \LimeSurvey\Menu\MenuItem($aMenuItemAdminOptions));
         }
@@ -231,7 +231,9 @@ class TwoFactorAdminLogin extends AuthPluginBase
             'label' => gT('2FA settings'),
             'href' => '#',
             'menuItems' => $aMenuItems,
-            'iconClass' => 'fa fa-lock fa-lg',
+            'iconClass' => 'ri-lock-fill',
+            'isInMiddleSection' => true,
+            'isPrepended' => false,
         ];
         $oNewMenu = new TFAMenuClass($aNewMenuOptions);
 

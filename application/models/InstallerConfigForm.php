@@ -40,7 +40,7 @@ class InstallerConfigForm extends CFormModel
     public const DB_TYPE_ODBC = 'odbc';
 
     public const MINIMUM_MEMORY_LIMIT = 128;
-    public const MINIMUM_PHP_VERSION = '7.2.5';
+    public const MINIMUM_PHP_VERSION = '7.4.0';
 
     // Database
     /** @var string $dbtype */
@@ -104,6 +104,9 @@ class InstallerConfigForm extends CFormModel
     public $isPhpMbStringPresent = false;
 
     /** @var bool */
+    public $isPhpFileInfoPresent = false;
+
+    /** @var bool */
     public $isPhpZlibPresent = false;
 
     /** @var bool */
@@ -132,6 +135,9 @@ class InstallerConfigForm extends CFormModel
 
     /** @var bool */
     public $isSodiumPresent = false;
+
+    /** @var bool */
+    public $isCollatorPresent = false;
 
     /** @var bool */
     public $isConfigPresent = false;
@@ -187,7 +193,7 @@ class InstallerConfigForm extends CFormModel
     {
         return [
             'dbtype' => gT("The type of your database management system"),
-            'dblocation' => gT('Set this to the IP/net location of your database server. In most cases "localhost" will work. You can force Unix socket with complete socket path.') . ' ' . gT('If your database is using a custom port attach it using a colon. Example: db.host.com:5431'),
+            'dblocation' => gT('Set this to the IP/net location of your database server. In most cases "localhost" will work. You can force Unix socket with socket path.') . ' ' . gT('If your database is using a custom port, attach it using a colon. Example: db.host.com:5431'),
             'dbname' => gT("If the database does not yet exist it will be created (make sure your database user has the necessary permissions). In contrast, if there are existing LimeSurvey tables in that database they will be upgraded automatically after installation."),
             'dbuser' => gT('Your database server user name. In most cases "root" will work.'),
             'dbpwd' => gT("Your database server password."),
@@ -203,14 +209,16 @@ class InstallerConfigForm extends CFormModel
 
     private function checkStatus()
     {
-        $this->isPhpMbStringPresent = function_exists('mb_convert_encoding');
-        $this->isPhpZlibPresent = function_exists('zlib_get_coding_type');
+        $this->isPhpMbStringPresent = extension_loaded('mbstring');
+        $this->isPhpFileInfoPresent = extension_loaded('fileinfo');
+        $this->isPhpZlibPresent =  extension_loaded('zlib');
         $this->isPhpJsonPresent = function_exists('json_encode');
         $this->isMemoryLimitOK = $this->checkMemoryLimit();
-        $this->isPhpLdapPresent = function_exists('ldap_connect');
-        $this->isPhpImapPresent = function_exists('imap_open');
-        $this->isPhpZipPresent = class_exists('ZipArchive');
+        $this->isPhpLdapPresent = extension_loaded('ldap');
+        $this->isPhpImapPresent = extension_loaded('imap');
+        $this->isPhpZipPresent = extension_loaded('zip');
         $this->isSodiumPresent = function_exists('sodium_crypto_sign_open');
+        $this->isCollatorPresent = class_exists('Collator');
 
         if (function_exists('gd_info')) {
             $gdInfo = gd_info();
@@ -234,6 +242,7 @@ class InstallerConfigForm extends CFormModel
             or !$this->isConfigDirWriteable
             or !$this->isPhpVersionOK
             or !$this->isPhpMbStringPresent
+            or !$this->isPhpFileInfoPresent
             or !$this->isPhpZlibPresent
             or !$this->isPhpJsonPresent
         ) {
@@ -280,12 +289,17 @@ class InstallerConfigForm extends CFormModel
         }
 
         if ($this->isMysql && $this->dbengine === self::ENGINE_TYPE_INNODB) {
-            $mariadb = preg_match('/MariaDB/i', $this->getMySqlConfigValue('version'));
-            $match = preg_match('/^\d+\.\d+\.\d+/', $this->getMySqlConfigValue('version'), $version);
+            $version = $this->getMySqlConfigValue('version');
+            if (is_null($version)) {
+                $this->addError($attribute, gT('Could not determine the database engine version. Please check your credentials.'));
+                return;
+            }
+            $mariadb = preg_match('/MariaDB/i', $version);
+            $match = preg_match('/^\d+\.\d+\.\d+/', $version, $matchedVersion);
             if (
                 !$match
-                    || (!$mariadb && version_compare($version[0], '5.7.0') <= 0)
-                    || ($mariadb && version_compare($version[0], '10.2.0') < 0)
+                    || (!$mariadb && version_compare($matchedVersion[0], '8.0.0') < 0)
+                    || ($mariadb && version_compare($matchedVersion[0], '10.2.2') < 0)
             ) {
                 // Only for older db-engine
                 if (!$this->isInnoDbLargeFilePrefixEnabled()) {
@@ -389,7 +403,7 @@ class InstallerConfigForm extends CFormModel
         try {
             $query = "SELECT " . $item . ";";
             $result = $this->db->createCommand($query)->queryRow();
-            return isset($result[$item]) ? $result[$item] : null;
+            return $result[$item] ?? null;
         } catch (\Exception $e) {
             // ignore
         }
@@ -401,8 +415,8 @@ class InstallerConfigForm extends CFormModel
      */
     private function isInnoDbBarracudaFileFormat()
     {
-        $check1 = $this->getMySqlConfigValue('innodb_file_format') == 'Barracuda';
-        $check2 = $this->getMySqlConfigValue('innodb_file_format_max') == 'Barracuda';
+        $check1 = $this->getMySqlConfigValue('innodb_file_format') == 'Barracuda' || $this->getMySqlConfigValue('innodb_file_format') == null;
+        $check2 = $this->getMySqlConfigValue('innodb_file_format_max') == 'Barracuda' || $this->getMySqlConfigValue('innodb_file_format_max') == null;
         return $check1 && $check2;
     }
 
@@ -521,8 +535,8 @@ class InstallerConfigForm extends CFormModel
         $port = $this->getDbPort();
 
         // MySQL allow unix_socket for database location, then test if $sDatabaseLocation start with "/"
-        if (substr($this->dblocation, 0, 1) == "/") {
-            $sDSN = "mysql:unix_socket={$this->dblocation}";
+        if (substr($this->dblocation, 0, 1) === "/") {
+            $sDSN = "mysql:unix_socket={$this->dblocation};";
         } else {
             $sDSN = "mysql:host={$this->dblocation};port={$port};";
         }
@@ -692,7 +706,7 @@ class InstallerConfigForm extends CFormModel
     public function getDataBaseName()
     {
         if ($this->db) {
-            preg_match("/dbname=([^;]*)/", $this->db->connectionString, $matches);
+            preg_match("/dbname=([^;]*)/", (string) $this->db->connectionString, $matches);
             $databaseName = $matches[1];
             return $databaseName;
         }

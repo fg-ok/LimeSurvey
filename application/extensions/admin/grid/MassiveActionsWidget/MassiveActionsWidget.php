@@ -25,7 +25,12 @@
             'yes-no-lg',
             'empty-lg',
             'cancel-apply',
-            'cancel-delete'
+            'cancel-change',
+            'cancel-resend',
+            'cancel-add',
+            'cancel-save',
+            'cancel-delete',
+            'cancel-export',
         ];
 
         // Selector variables
@@ -44,7 +49,7 @@
             foreach($this->aActions as $key => $aAction)
             {
                 // Not all action require a modal (eg: downloads, etc)
-                if( isset($aAction['actionType']) && $aAction['actionType']=='modal')
+                if (isset($aAction['actionType']) && $aAction['actionType'] === 'modal')
                 {
                     // Modal type define the view to render in views/modal
                     if ($this->isView($aAction['modalType']))

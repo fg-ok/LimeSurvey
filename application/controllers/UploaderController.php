@@ -24,7 +24,7 @@ class UploaderController extends SurveyController
     public function run($actionID)
     {
         $surveyid = Yii::app()->session['LEMsid'];
-        if(empty($surveyid)) {
+        if (empty($surveyid)) {
             throw new CHttpException(401, gT("We are sorry but your session has expired."));
         }
         $oSurvey = Survey::model()->findByPk($surveyid);
@@ -32,7 +32,7 @@ class UploaderController extends SurveyController
             throw new CHttpException(400);
         }
 
-        $sLanguage = isset(Yii::app()->session['survey_' . $surveyid]['s_lang']) ? Yii::app()->session['survey_' . $surveyid]['s_lang'] : "";
+        $sLanguage = Yii::app()->session['survey_' . $surveyid]['s_lang'] ?? "";
         Yii::app()->setLanguage($sLanguage);
         $uploaddir = Yii::app()->getConfig("uploaddir");
         $tempdir = Yii::app()->getConfig("tempdir");
@@ -49,38 +49,38 @@ class UploaderController extends SurveyController
 
         // Validate and filter and throw error if problems
         // Using 'futmp_'.randomChars(15).'_'.$pathinfo['extension'] for filename, then remove all other characters
-        $sFileGetContentFiltered = preg_replace('/[^a-zA-Z0-9_]/', '', $sFileGetContent);
-        $sFileNameFiltered = preg_replace('/[^a-zA-Z0-9_]/', '', $sFileName);
-        $sFieldNameFiltered = preg_replace('/[^X0-9]/', '', $sFieldName);
+        $sFileGetContentFiltered = preg_replace('/[^a-zA-Z0-9_]/', '', (string) $sFileGetContent);
+        $sFileNameFiltered = preg_replace('/[^a-zA-Z0-9_]/', '', (string) $sFileName);
+        $sFieldNameFiltered = preg_replace('/[^X0-9]/', '', (string) $sFieldName);
         if ($sFileGetContent != $sFileGetContentFiltered || $sFileName != $sFileNameFiltered || $sFieldName != $sFieldNameFiltered) {
             // If one seems to be a hack: Bad request
             throw new CHttpException(400); // See for debug > 1
         }
-        if ($sFileGetContent) {
-            if (substr($sFileGetContent, 0, 6) == 'futmp_') {
+        if ($sFileGetContentFiltered) {
+            if (substr($sFileGetContentFiltered, 0, 6) == 'futmp_') {
                 $sFileDir = $tempdir . '/upload/';
-            } elseif (substr($sFileGetContent, 0, 3) == 'fu_') {
+            } elseif (substr($sFileGetContentFiltered, 0, 3) == 'fu_') {
                 // Need to validate $_SESSION['srid'], and this file is from this srid !
                 $sFileDir = "{$uploaddir}/surveys/{$surveyid}/files/";
             } else {
                 throw new CHttpException(400); // See for debug > 1
             }
-            if (is_file($sFileDir . $sFileGetContent)) {
+            if (is_file($sFileDir . $sFileGetContentFiltered)) {
                 // Validate file before else 500 error by getMimeType
-                $mimeType = LSFileHelper::getMimeType($sFileDir . $sFileGetContent, null, false);
+                $mimeType = LSFileHelper::getMimeType($sFileDir . $sFileGetContentFiltered, null, false);
                 if (is_null($mimeType)) {
                     $mimeType = "application/octet-stream"; // Can not really get content if not image
                 }
                 header('Content-Type: ' . $mimeType);
-                readfile($sFileDir . $sFileGetContent);
+                readfile($sFileDir . $sFileGetContentFiltered);
                 Yii::app()->end();
             } else {
                 Yii::app()->end();
             }
         } elseif ($bDelete) {
-            if (substr($sFileName, 0, 6) == 'futmp_') {
+            if (substr((string) $sFileName, 0, 6) == 'futmp_') {
                 $sFileDir = $tempdir . '/upload/';
-            } elseif (substr($sFileName, 0, 3) == 'fu_') {
+            } elseif (substr((string) $sFileName, 0, 3) == 'fu_') {
                 // Need to validate $_SESSION['srid'], and this file is from this srid !
                 $sFileDir = "{$uploaddir}/surveys/{$surveyid}/files/";
             } else {
@@ -88,10 +88,10 @@ class UploaderController extends SurveyController
             }
             if (isset($_SESSION[$sFieldName])) {
                 // We already have $sFieldName ?
-                $sJSON = $_SESSION[$sFieldName];
-                $aFiles = json_decode(stripslashes($sJSON), true);
+                $sJSON = $_SESSION[$sFieldName] ?? '';
+                $aFiles = json_decode(stripslashes($sJSON), true) ?? [];
 
-                if (substr($sFileName, 0, 3) == 'fu_') {
+                if (substr((string) $sFileName, 0, 3) == 'fu_') {
                     $iFileIndex = 0;
                     $found = false;
                     foreach ($aFiles as $aFile) {
@@ -109,8 +109,8 @@ class UploaderController extends SurveyController
             }
             //var_dump($sFileDir.$sFilename);
             // Return some json to do a beautiful text
-            if (@unlink($sFileDir . $sFileName)) {
-                echo sprintf(gT('File %s deleted'), $sOriginalFileName);
+            if (@unlink($sFileDir . $sFileNameFiltered)) {
+                echo sprintf(gT('File %s deleted'), CHtml::encode($sOriginalFileName));
             } else {
                 echo gT('Oops, There was an error deleting the file');
             }
@@ -140,16 +140,16 @@ class UploaderController extends SurveyController
                 // Try to create
                 mkdir($sTempUploadDir);
             }
-            $filename = $_FILES['uploadfile']['name'];
-            // Do we filter file name ? It's used on displaying only , but not save like that.
-            //$filename = sanitize_filename($_FILES['uploadfile']['name']);// This remove all non alpha numeric characters and replaced by _ . Leave only one dot .
+            $filename = sanitize_filename($_FILES['uploadfile']['name'], false, false, true);
             $size = $_FILES['uploadfile']['size'] / 1024;
             $preview = Yii::app()->session['preview'];
-            $aFieldMap = createFieldMap($oSurvey, 'short', false, false, $sLanguage);
-            if (!isset($aFieldMap[$sFieldName])) {
-                throw new CHttpException(400); // See for debug > 1
+            /* Find the question by sFieldName : must be a upload question type, and id is end of sFieldName in $surveyid*/
+            $aFieldName = explode("X", $sFieldName);
+            if (empty($aFieldName[2]) || !ctype_digit($aFieldName[2])) {
+                throw new CHttpException(400);
             }
-            $aAttributes = QuestionAttribute::model()->getQuestionAttributes($aFieldMap[$sFieldName]['qid']);
+            $oQuestion = self::getQuestion($surveyid, $aFieldName[2]);
+            $aAttributes = QuestionAttribute::model()->getQuestionAttributes($oQuestion);
             $maxfilesize = min(intval($aAttributes['max_filesize']), getMaximumFileUploadSize() / 1024);
             if ($maxfilesize <= 0) {
                 $maxfilesize = getMaximumFileUploadSize() / 1024;
@@ -180,9 +180,9 @@ class UploaderController extends SurveyController
                 Yii::app()->end();
             }
 
-            $valid_extensions_array = explode(",", $aAttributes['allowed_filetypes']);
+            $valid_extensions_array = explode(",", (string) $aAttributes['allowed_filetypes']);
             $valid_extensions_array = array_map('trim', $valid_extensions_array);
-            $pathinfo = pathinfo($_FILES['uploadfile']['name']);
+            $pathinfo = pathinfo((string) $_FILES['uploadfile']['name']);
             $ext = strtolower($pathinfo['extension']);
             $cleanExt = CHtml::encode($ext);
             $randfilename = 'futmp_' . randomChars(15) . '_' . $pathinfo['extension'];
@@ -242,11 +242,12 @@ class UploaderController extends SurveyController
             // If this is just a preview, don't save the file
             if ($preview) {
                 if (move_uploaded_file($_FILES['uploadfile']['tmp_name'], $randfileloc)) {
+                    /** @psalm-suppress UndefinedVariable TODO: Dead code? */
                     $return = array(
                                 "success"       => true,
                                 "file_index"    => $filecount,
                                 "size"          => $size,
-                                "name"          => rawurlencode(basename($filename)),
+                                "name"          => rawurlencode(basename((string) $filename)),
                                 "ext"           => $cleanExt,
                                 "filename"      => $randfilename,
                                 "msg"           => gT("The file has been successfully uploaded.")
@@ -272,12 +273,12 @@ class UploaderController extends SurveyController
                 }
                 if (move_uploaded_file($_FILES['uploadfile']['tmp_name'], $randfileloc)) {
                     $return = array(
-                        "success" => true,
-                        "size"    => $size,
-                        "name"    => rawurlencode(basename($filename)),
-                        "ext"     => $cleanExt,
-                        "filename"      => $randfilename,
-                        "msg"     => gT("The file has been successfully uploaded.")
+                        "success"  => true,
+                        "size"     => $size,
+                        "name"     => $filename,
+                        "ext"      => $cleanExt,
+                        "filename" => $randfilename,
+                        "msg"      => gT("The file has been successfully uploaded.")
                     );
                     //header('Content-Type: application/json');
                     echo ls_json_encode($return);
@@ -287,7 +288,7 @@ class UploaderController extends SurveyController
             /* We get there : an unknow error happen … maybe a move_uploaded_file error (with debug=0) */
             $return = array(
                 "success" => false,
-                "msg" => gT("An unknown error occured")
+                "msg" => gT("An unknown error occurred")
             );
             /* Add information for for user forcedSuperAdmin right */
             if (Permission::isForcedSuperAdmin(Permission::model()->getUserId())) {
@@ -300,13 +301,13 @@ class UploaderController extends SurveyController
         /* No action */
         $meta = '';
         App()->getClientScript()->registerPackage('question-file-upload');
-        
+
         $aSurveyInfo = getSurveyInfo($surveyid, $sLanguage);
         $oEvent = new PluginEvent('beforeSurveyPage');
         $oEvent->set('surveyId', $surveyid);
         App()->getPluginManager()->dispatchEvent($oEvent);
         if (!is_null($oEvent->get('template'))) {
-            $aSurveyInfo['templatedir'] = $event->get('template');
+            $aSurveyInfo['templatedir'] = $oEvent->get('template');
         }
         $sTemplateDir = getTemplatePath($aSurveyInfo['template']);
         $sTemplateUrl = getTemplateURL($aSurveyInfo['template']) . "/";
@@ -341,8 +342,6 @@ class UploaderController extends SurveyController
         $oTemplate = Template::model()->getInstance('', $surveyid);
         App()->getClientScript()->registerScript('sNeededScriptVar', $sNeededScriptVar, LSYii_ClientScript::POS_BEGIN);
         App()->getClientScript()->registerScript('sLangScriptVar', $sLangScriptVar, LSYii_ClientScript::POS_BEGIN);
-        App()->getClientScript()->registerScriptFile(Yii::app()->getConfig('packages') . 'questions/upload/build/uploadquestion.js');
-        App()->getClientScript()->registerScriptFile(Yii::app()->getConfig('packages') . 'questions/upload/src/ajaxupload.js');
 
         $header = getHeader($meta);
 
@@ -350,12 +349,19 @@ class UploaderController extends SurveyController
 
         $fn = $sFieldName;
         $qid = (int) Yii::app()->request->getParam('qid');
-        $minfiles = (int) Yii::app()->request->getParam('minfiles');
-        $maxfiles = (int) Yii::app()->request->getParam('maxfiles');
-        $qidattributes = QuestionAttribute::model()->getQuestionAttributes($qid);
+        $oQuestion = self::getQuestion($surveyid, $qid);
+        $qidattributes = QuestionAttribute::model()->getQuestionAttributes($oQuestion);
         $qidattributes['max_filesize'] = floor(min(intval($qidattributes['max_filesize']), getMaximumFileUploadSize() / 1024));
         if ($qidattributes['max_filesize'] <= 0) {
             $qidattributes['max_filesize'] = getMaximumFileUploadSize() / 1024;
+        }
+        $minfiles = "";
+        if (!empty($qidattributes['min_num_of_files'])) {
+            $minfiles = intval($qidattributes['min_num_of_files']);
+        }
+        $maxfiles = "";
+        if (!empty($qidattributes['max_num_of_files'])) {
+            $maxfiles = intval($qidattributes['max_num_of_files']);
         }
         $aData = [
             'fn' => $fn,
@@ -378,7 +384,7 @@ class UploaderController extends SurveyController
                     . "sPreview : '" . $sPreview . "', "
                     . "questgrppreview : '" . $sPreview . "', "
                     . "uploadurl : '" . $this->createUrl('/uploader/index/mode/upload/') . "', "
-                    . "csrfToken: '" . ls_json_encode(Yii::app()->request->csrfToken) . "', "
+                    . "csrfToken: " . ls_json_encode(Yii::app()->request->csrfToken) . ", " // does not need quotes as json_encode already encodes
                     . "showpopups: '" . Yii::app()->getConfig("showpopups") . "', "
                     . "uploadLang: " . $sLangScript
                     . "});
@@ -390,5 +396,27 @@ class UploaderController extends SurveyController
         </html>';
         App()->getClientScript()->render($body);
         echo $body;
+    }
+
+    /**
+     * Helper function to get question
+     * @param integer $surveyid the survey id
+     * @param integer $qid the question id
+     * @throw CHttpException if question is invalid
+     * @return \Question
+     */
+    private static function getQuestion($surveyid, $qid)
+    {
+        $oQuestion = Question::model()->find("sid = :sid and qid = :qid and type = :type", [":sid" => $surveyid, ":qid" => $qid, ":type" =>  Question::QT_VERTICAL_FILE_UPLOAD]);
+        if ($oQuestion) {
+            return $oQuestion;
+        }
+        /* Log as warning */
+        \Yii::log(sprintf("Invalid upload question %s in survey %s", $qid, $surveyid), 'warning', 'application.UploaderController');
+        /* Show information if user have surveycontent/update (can set question type) */
+        if (Permission::model()->hasSurveyPermission($surveyid, 'surveycontent', 'update')) {
+            throw new CHttpException(400, sprintf(gT("Invalid upload question %s in survey %s"), $qid, $surveyid));
+        }
+        throw new CHttpException(400);
     }
 }

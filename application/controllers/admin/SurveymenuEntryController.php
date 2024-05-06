@@ -3,7 +3,7 @@
 /**
  * Class SurveymenuEntryController
  */
-class SurveymenuEntryController extends Survey_Common_Action
+class SurveymenuEntryController extends SurveyCommonAction
 {
     /**
      * SurveymenuEntryController constructor.
@@ -19,7 +19,7 @@ class SurveymenuEntryController extends Survey_Common_Action
             $this->getController()->redirect($this->getController()->createUrl("/admin/"));
         }
     }
-    
+
     /**
      * @return string[] action filters
      */
@@ -66,13 +66,9 @@ class SurveymenuEntryController extends Survey_Common_Action
                     'reorder'      => true,
                 ],
             ],
-            'returnbutton' => [
-                'url'  => 'admin/index',
-                'text' => gT('Back'),
-            ],
         ];
         App()->getClientScript()->registerPackage('surveymenufunctions');
-        $this->_renderWrappedTemplate(null, array('surveymenu_entries/index'), $data);
+        $this->renderWrappedTemplate(null, array('surveymenu_entries/index'), $data);
     }
 
     public function getsurveymenuentryform($menuentryid = null)
@@ -123,8 +119,9 @@ class SurveymenuEntryController extends Survey_Common_Action
             $this->getController()->redirect(Yii::app()->createUrl('/admin'));
         }
         //Update or create
+        $id = (int) $id;
         if ($id != 0) {
-            $model = $this->loadModel($id);
+            $model = SurveymenuEntries::model()->findByPk($id);
         } else {
             $model = new SurveymenuEntries();
         }
@@ -133,7 +130,7 @@ class SurveymenuEntryController extends Survey_Common_Action
             Yii::app()->user->setFlash('error', gT("Access denied"));
             $this->getController()->redirect(Yii::app()->createUrl('/admin'));
         }
-        
+
         $success = false;
         if (Yii::app()->request->isPostRequest) {
             $aSurveymenuEntry = Yii::app()->request->getPost('SurveymenuEntries', []);
@@ -167,10 +164,10 @@ class SurveymenuEntryController extends Survey_Common_Action
             false
         );
     }
-    
+
     public function batchEdit()
     {
-        $aSurveyMenuEntryIds = json_decode(Yii::app()->request->getPost('sItems'));
+        $aSurveyMenuEntryIds = json_decode(Yii::app()->request->getPost('sItems', '')) ?? [];
         $aResults = array();
         $oBaseModel = SurveymenuEntries::model();
         if (Permission::model()->hasGlobalPermission('settings', 'update')) {
@@ -182,11 +179,11 @@ class SurveymenuEntryController extends Survey_Common_Action
             $aCoreTokenFields = array('menu_id', 'menu_class', 'permission', 'permission_grade', 'language');
 
             foreach ($aCoreTokenFields as $sCoreTokenField) {
-                if (trim(Yii::app()->request->getPost($sCoreTokenField, 'lskeep')) != 'lskeep') {
+                if (trim((string) Yii::app()->request->getPost($sCoreTokenField, 'lskeep')) != 'lskeep') {
                     $aData[$sCoreTokenField] = flattenText(Yii::app()->request->getPost($sCoreTokenField));
                 }
             }
-            
+
             if (count($aData) > 0) {
                 foreach ($aSurveyMenuEntryIds as $iSurveyMenuEntryId) {
                     $iSurveyMenuEntryId = (int) $iSurveyMenuEntryId;
@@ -195,7 +192,7 @@ class SurveymenuEntryController extends Survey_Common_Action
                     foreach ($aData as $k => $v) {
                         $oSurveyMenuEntry->$k = $v;
                     }
-                    
+
                     $bUpdateSuccess = $oSurveyMenuEntry->update();
                     if ($bUpdateSuccess) {
                         $aResults[$iSurveyMenuEntryId]['status']    = true;
@@ -228,6 +225,9 @@ class SurveymenuEntryController extends Survey_Common_Action
             $this->getController()->redirect(Yii::app()->createUrl('/admin'));
         }
 
+        //get model to do the work
+        $model = SurveymenuEntries::model();
+
         if (Yii::app()->request->isPostRequest) {
             //Check for permission!
             if (!Permission::model()->hasGlobalPermission('superadmin', 'read')) {
@@ -246,8 +246,6 @@ class SurveymenuEntryController extends Survey_Common_Action
                     false
                 );
             }
-            //get model to do the work
-            $model = SurveymenuEntries::model();
             $success = $model->restoreDefaults();
             return Yii::app()->getController()->renderPartial(
                 '/admin/super/_renderJson',
@@ -277,14 +275,18 @@ class SurveymenuEntryController extends Survey_Common_Action
         }
 
         if (Yii::app()->request->isPostRequest) {
-            $aSurveyMenuEntryIds = json_decode(Yii::app()->request->getPost('sItems'));
+            $aSurveyMenuEntryIds = json_decode(Yii::app()->request->getPost('sItems', '')) ?? [];
             $success = [];
             foreach ($aSurveyMenuEntryIds as $menuEntryid) {
-                $model = $this->loadModel($menuEntryid);
-                $success[$menuEntryid] = $model->delete();
+                $model = SurveymenuEntries::model()->findByPk((int)$menuEntryid);
+                $success[$menuEntryid] = false;
+                if ($model !== null) {
+                    $model->delete();
+                    $success[$menuEntryid] = true;
+                }
             }
 
-            $debug = isset($userConfig['config']['debug']) ? $userConfig['config']['debug'] : 0;
+            $debug = App()->getConfig('debug');
             $returnData = array(
                 'data' => [
                     'success' => $success,
@@ -295,12 +297,12 @@ class SurveymenuEntryController extends Survey_Common_Action
                     )
                 ]
             );
-            
+
             if ($debug > 0) {
                 $returnData['data']['debug'] = [$model, $_POST];
                 $returnData['data']['debugErrors'] = $model->getErrors();
             }
-    
+
             return Yii::app()->getController()->renderPartial(
                 '/admin/super/_renderJson',
                 $returnData,
@@ -323,14 +325,16 @@ class SurveymenuEntryController extends Survey_Common_Action
         if (Yii::app()->request->isPostRequest) {
             $menuEntryid = Yii::app()->request->getPost('menuEntryid', 0);
             $success = false;
-            $model = $this->loadModel($menuEntryid);
+            $model = SurveymenuEntries::model()->findByPk((int)$menuEntryid);
             //Don't delete  main menu entries when not superadmin
             if (($model->menu_id == 1 || $model->menu_id == 2) && !Permission::model()->hasGlobalPermission('superadmin', 'read')) {
                 Yii::app()->user->setFlash('error', gT("Access denied"));
                 $this->getController()->redirect(Yii::app()->createUrl('/admin'));
             }
-            $success = $model->delete();
-            $debug = isset($userConfig['config']['debug']) ? $userConfig['config']['debug'] : 0;
+            $debug = App()->getConfig('debug');
+            if ($model !== null) {
+                $success = $model->delete();
+            }
 
             $returnData = array(
                 'data' => [
@@ -342,12 +346,12 @@ class SurveymenuEntryController extends Survey_Common_Action
                     )
                 ]
             );
-            
+
             if ($debug > 0) {
                 $returnData['data']['debug'] = [$model, $_POST];
                 $returnData['data']['debugErrors'] = $model->getErrors();
             }
-    
+
             return Yii::app()->getController()->renderPartial(
                 '/admin/super/_renderJson',
                 $returnData,
@@ -370,8 +374,8 @@ class SurveymenuEntryController extends Survey_Common_Action
         if (Yii::app()->request->isPostRequest) {
             $model = SurveymenuEntries::model();
             $success = $model->reorder();
-            $debug = isset($userConfig['config']['debug']) ? $userConfig['config']['debug'] : 0;
-            
+            $debug = App()->getConfig('debug');
+
             $returnData = array(
                 'data' => [
                     'success' => $success,
@@ -382,12 +386,12 @@ class SurveymenuEntryController extends Survey_Common_Action
                     )
                 ]
             );
-            
+
             if ($debug > 0) {
                 $returnData['data']['debug'] = [$model, $_POST];
                 $returnData['data']['debugErrors'] = $model->getErrors();
             }
-    
+
             return Yii::app()->getController()->renderPartial(
                 '/admin/super/_renderJson',
                 $returnData,
@@ -404,6 +408,7 @@ class SurveymenuEntryController extends Survey_Common_Action
      * @param integer $id the ID of the model to be loaded
      * @return SurveymenuEntries the loaded model
      * @throws CHttpException
+     * * @deprecated do not use this function in future
      */
     public function loadModel($id)
     {

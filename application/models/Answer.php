@@ -22,8 +22,8 @@
  * @property integer $assessment_value
  * @property integer $scale_id
  *
- * @property Question $questions
- * @property Question $groups
+ * @property Question $question
+ * @property Question $group
  * @property AnswerL10n[] $answerl10ns
  */
 class Answer extends LSActiveRecord
@@ -31,15 +31,15 @@ class Answer extends LSActiveRecord
     private $oldCode;
     private $oldQid;
     private $oldScaleId;
-    
+
     /**
      * @inheritdoc
      * @return static
      */
-    public static function model($class = __CLASS__)
+    public static function model($className = __CLASS__)
     {
         /** @var self $model */
-        $model = parent::model($class);
+        $model = parent::model($className);
         return $model;
     }
 
@@ -68,7 +68,7 @@ class Answer extends LSActiveRecord
             ),
             'answerl10ns' => array(self::HAS_MANY, 'AnswerL10n', 'aid', 'together' => true),
             'questionl10ns' => array(self::HAS_MANY, 'QuestionL10n', 'qid', 'together' => true)
-            
+
         );
     }
 
@@ -78,15 +78,31 @@ class Answer extends LSActiveRecord
         return array(
             array('qid', 'numerical', 'integerOnly' => true),
             array('code', 'length', 'min' => 1, 'max' => 5),
+            array('code', 'required'),
+            // Only alphanumeric
+            array(
+                'code',
+                'match',
+                'pattern' => '/^[[:alnum:]]*$/',
+                'message' => gT('Answer codes may only contain alphanumeric characters.'),
+            ),
             // Unicity of key
             array(
                 'code',
                 'checkUniqueness',
-                'message' => gT('Answer codes must be unique by question.')
+                'message' => gT('Answer codes must be unique by question.'),
+                'except' => 'saveall'
             ),
             array('sortorder', 'numerical', 'integerOnly' => true, 'allowEmpty' => true),
             array('assessment_value', 'numerical', 'integerOnly' => true, 'allowEmpty' => true),
             array('scale_id', 'numerical', 'integerOnly' => true, 'allowEmpty' => true),
+        );
+    }
+
+    public function defaultScope()
+    {
+        return array(
+            'order' => 'sortorder, code'
         );
     }
 
@@ -207,7 +223,7 @@ class Answer extends LSActiveRecord
      */
     public static function updateSortOrder($qid)
     {
-        $data = self::model()->findAllByAttributes(array('qid' => $qid), array('order' => 'sortorder asc'));
+        $data = self::model()->findAllByAttributes(array('qid' => $qid), array('order' => 'sortorder, code'));
         $position = 0;
 
         foreach ($data as $row) {
@@ -224,7 +240,7 @@ class Answer extends LSActiveRecord
      */
     public function getAnswersForStatistics($fields, $condition, $orderby)
     {
-        return Answer::model()->findAll($condition);
+        return Answer::model()->findAll(['condition' => $condition, 'order' => $orderby]);
     }
 
     /**
@@ -235,7 +251,7 @@ class Answer extends LSActiveRecord
      */
     public function getQuestionsForStatistics($fields, $condition, $orderby)
     {
-        $oAnswers = Answer::model()->with('answerl10ns')->findAll($condition);
+        $oAnswers = Answer::model()->with('answerl10ns')->findAll(['condition' => $condition,'order' => $orderby]);
         $arr = array();
         foreach ($oAnswers as $key => $answer) {
             $arr[$key] = array_merge($answer->attributes, current($answer->answerl10ns)->attributes);

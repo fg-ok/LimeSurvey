@@ -88,10 +88,10 @@ class AdminViewsTest extends TestBaseClassView
             if (isset($view['activate']) && $view['activate']) {
                 $activator = new \SurveyActivator(self::$testSurvey);
                 $activator->activate();
-                \Token::createTable(self::$surveyId);
+                if (!tableExists("{{tokens_" . self::$surveyId . "}}")) {
+                    \Token::createTable(self::$surveyId);
+                }
             }
-
-
         } elseif (empty(self::$surveyId)) {
             // This situation can happen if we test only one data entry,
             // using --filter="testAdminSurveyViews#13" (for data entry 13).
@@ -120,24 +120,6 @@ class AdminViewsTest extends TestBaseClassView
      */
     public function testSettingsViews($name, $view)
     {
-        $this->findViewTag($name, $view);
-    }
-
-    /**
-     * @param string $name
-     * @param array$view
-     * @dataProvider addUsersViews
-     */
-    public function testUserViews($name,$view){
-        // use Admin user
-        $uid = 1;
-        // non-adminuser for some views
-        if(in_array($name,['setUserPermissions','setUserTemplates'])){
-            // FIXME need to crate another user
-            $this->markTestSkipped();
-            $uid = 2;
-        }
-        $view['route'] = ReplaceFields($view['route'],['{UID}'=>$uid]);
         $this->findViewTag($name, $view);
     }
 

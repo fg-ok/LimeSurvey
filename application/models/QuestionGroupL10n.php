@@ -22,7 +22,6 @@
  */
 class QuestionGroupL10n extends LSActiveRecord
 {
-
     /** @inheritdoc */
     public function tableName()
     {
@@ -39,10 +38,10 @@ class QuestionGroupL10n extends LSActiveRecord
      * @inheritdoc
      * @return self
      */
-    public static function model($class = __CLASS__)
+    public static function model($className = __CLASS__)
     {
         /** @var self $model */
-        $model = parent::model($class);
+        $model = parent::model($className);
         return $model;
     }
 
@@ -51,7 +50,7 @@ class QuestionGroupL10n extends LSActiveRecord
     {
         $alias = $this->getTableAlias();
         return array(
-            'group' => array(self::BELONGS_TO, 'group', '', 'on' => "$alias.gid = group.gid"),
+            'group' => array(self::BELONGS_TO, QuestionGroup::class, '', 'on' => "$alias.gid = group.gid"),
         );
     }
 

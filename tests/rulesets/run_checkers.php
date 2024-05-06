@@ -11,7 +11,7 @@
  * Before running this file, you need to install phpmd, phpcs and psalm (composer install
  * should be enough for psalm). TODO: More instructions.
  *
- * @author Olle Haerstedt
+ * @author LimeSurvey GmbH
  * @since 2018-04-16
  */
 
@@ -35,13 +35,13 @@ function checkFile($file)
     $numberOfFiles++;
 
     $phpmd_output = [];
-    exec(sprintf('./third_party/bin/phpmd %s text tests/rulesets/phpmd_ruleset.xml', $file), $phpmd_output);
+    exec(sprintf('./vendor/bin/phpmd %s text tests/rulesets/phpmd_ruleset.xml', $file), $phpmd_output);
 
     $phpcs_output = [];
-    exec(sprintf('./third_party/bin/phpcs --report=emacs --standard=tests/rulesets/phpcs_ruleset.xml %s', $file), $phpcs_output);
+    exec(sprintf('./vendor/bin/phpcs --report=emacs --standard=tests/rulesets/phpcs_ruleset.xml %s', $file), $phpcs_output);
 
     $psalm_output = [];
-    exec(sprintf('./third_party/bin/psalm -m --output-format=emacs %s', $file), $psalm_output);
+    exec(sprintf('./vendor/bin/psalm -m --output-format=emacs %s', $file), $psalm_output);
 
     $output = array_merge($phpmd_output, $phpcs_output, $psalm_output);
 

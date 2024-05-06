@@ -27,6 +27,19 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
     private $sLabelWidth;
     private $sInputContainerWidth;
 
+    /** @var boolean indicates if the question has the 'Other' option enabled */
+    protected $hasOther;
+
+    /** @var int the position where the 'Other' option should be placed. Possible values: 0 (At end), 1 (At beginning), 3 (After specific subquestion)*/
+    protected $otherPosition;
+
+    /** @var string the title of the subquestion after which the 'Other' option should be placed (if $otherPosition == 3) */
+    protected $subquestionBeforeOther;
+
+    const OTHER_POS_END = 'end';
+    const OTHER_POS_START = 'beginning';
+    const OTHER_POS_AFTER_SUBQUESTION = 'specific';
+
     public function __construct($aFieldArray, $bRenderDirect = false)
     {
         parent::__construct($aFieldArray, $bRenderDirect);
@@ -39,11 +52,11 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
         
         /*Find the col-sm width : if none is set : default, if one is set, set another one to be 12, if two is set : no change */
 
-        $this->attributeInputContainerWidth = intval(trim($this->getQuestionAttribute('text_input_columns')));
+        $this->attributeInputContainerWidth = intval(trim((string) $this->getQuestionAttribute('text_input_columns')));
         if ($this->attributeInputContainerWidth < 1 || $this->attributeInputContainerWidth > 12) {
             $this->attributeInputContainerWidth = null;
         }
-        $this->attributeLabelWidth = intval(trim($this->getQuestionAttribute('choice_input_columns')));
+        $this->attributeLabelWidth = intval(trim((string) $this->getQuestionAttribute('choice_input_columns')));
         if ($this->attributeLabelWidth < 1 || $this->attributeLabelWidth > 12) {
             /* old system or imported */
             $this->attributeLabelWidth = null;
@@ -68,6 +81,13 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
                 $this->sLabelWidth = 12 - $this->attributeInputContainerWidth;
             }
         }
+
+        $this->hasOther = $this->oQuestion->other == 'Y';
+        $this->otherPosition = $this->setDefaultIfEmpty($this->getQuestionAttribute('other_position'), self::OTHER_POS_END);
+        $this->subquestionBeforeOther = '';
+        if ($this->hasOther && $this->otherPosition == self::OTHER_POS_AFTER_SUBQUESTION) {
+            $this->subquestionBeforeOther = $this->getQuestionAttribute('other_position_code');
+        }
     }
 
     public function getMainView()
@@ -77,9 +97,16 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
     
     public function getRows()
     {
+        $otherAdded = false;
+
         $aRows = [];
         if ($this->getQuestionCount() == 0) {
             return $aRows;
+        }
+
+        if ($this->hasOther && $this->otherPosition == self::OTHER_POS_START) {
+            $aRows[] = $this->getOtherRow();
+            $otherAdded = true;
         }
 
         $checkconditionFunction = "checkconditions";
@@ -89,8 +116,8 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
             $mSessionValue = $this->setDefaultIfEmpty($_SESSION['survey_' . Yii::app()->getConfig('surveyID')][$myfname], '');
             $mSessionValue2 = $this->setDefaultIfEmpty($_SESSION['survey_' . Yii::app()->getConfig('surveyID')][$myfname2], '');
             
-            if ($this->iLabelWidth < strlen(trim(strip_tags($oQuestion->questionl10ns[$this->sLanguage]->question)))) {
-                $this->iLabelWidth = strlen(trim(strip_tags($oQuestion->questionl10ns[$this->sLanguage]->question)));
+            if ($this->iLabelWidth < strlen(trim(strip_tags((string) $oQuestion->questionl10ns[$this->sLanguage]->question)))) {
+                $this->iLabelWidth = strlen(trim(strip_tags((string) $oQuestion->questionl10ns[$this->sLanguage]->question)));
             }
 
             $this->inputnames[] = $myfname;
@@ -119,9 +146,13 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
                 'sInputContainerWidth' => $this->sInputContainerWidth,
                 'sLabelWidth'          => $this->sLabelWidth,
             );
+            if ($this->hasOther && $this->otherPosition == self::OTHER_POS_AFTER_SUBQUESTION && $this->subquestionBeforeOther == $oQuestion->title) {
+                $aRows[] = $this->getOtherRow();
+                $otherAdded = true;
+            }
         }
 
-        if ($this->oQuestion->other == 'Y') {
+        if ($this->hasOther && !$otherAdded) {
             $aRows[] = $this->getOtherRow();
         }
 
@@ -146,7 +177,7 @@ class RenderMultipleChoiceWithComments extends QuestionBaseRenderer
         if (!empty($mSessionValue)) {
             $dispVal = $mSessionValue;
             if ($this->getQuestionAttribute('other_numbers_only') == 1) {
-                $dispVal = str_replace('.', $sSeparator, $dispVal);
+                $dispVal = str_replace('.', $sSeparator, (string) $dispVal);
             }
             $sValue .= CHtml::encode($dispVal);
         }

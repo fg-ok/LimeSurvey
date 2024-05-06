@@ -19,7 +19,7 @@ use Exception;
 
 /**
  * @since 2018-09-26
- * @author Olle Haerstedt
+ * @author LimeSurvey GmbH
  */
 abstract class VersionFetcher
 {
@@ -102,7 +102,7 @@ abstract class VersionFetcher
     }
 
     /**
-     * @return string?
+     * @return ?string
      */
     public function getManualUpdateUrl()
     {

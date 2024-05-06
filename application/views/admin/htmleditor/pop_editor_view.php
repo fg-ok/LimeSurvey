@@ -6,7 +6,6 @@
         <meta name="robots" content="noindex, nofollow" />
         <?php
             App()->getClientScript()->registerPackage('jqueryui');
-            App()->getClientScript()->registerPackage('jquery-superfish');
             App()->getClientScript()->registerPackage('ckeditor');
             App()->getClientScript()->registerPackage('ckeditoradditions');
             App()->getClientScript()->registerCssFile(Yii::app()->getConfig('publicstyleurl') . 'jquery-ui.css');
@@ -15,7 +14,7 @@
     </head>
 
     <body>
-        <?php echo CHtml::form('', 'post', array('onsubmit'=>'saveChanges=true;'));?>
+        <?php echo CHtml::form('', 'post', array('onsubmit' => 'saveChanges=true;'));?>
 
             <script type='text/javascript'>
                 <!--
@@ -31,8 +30,8 @@
 
 
                 var saveChanges = false;
-                var sReplacementFieldTitle = '<?php eT('Placeholder fields','js');?>';
-                var sReplacementFieldButton = '<?php eT('Insert/edit placeholder field','js');?>';
+                var sReplacementFieldTitle = '<?php eT('Placeholder fields', 'js');?>';
+                var sReplacementFieldButton = '<?php eT('Insert/edit placeholder field', 'js');?>';
                 $(document).on('ready pjax:scriptcomplete', function(){
                     //console.log('iGroupId: '+iGroupId);
             // Better use try/catch to not crash JS completely
@@ -40,19 +39,38 @@
                 try{ console.log('iGroupId: '+iGroupId); } catch (e){ console.log(e); }
                 */
                 if($('textarea').length > 0){
+                    <?php
+                    /* @var string[] parameters of the replacementfields url */
+                    $replacementFieldsUrlParams = array(
+                        'fieldtype' => $sFieldType, // email_XX_lang, question_lang …
+                    );
+                    if (!empty($sAction)) {
+                        $replacementFieldsUrlParams['action'] = javascriptEscape($sAction);
+                    }
+                    if (!empty($iSurveyId)) {
+                        $replacementFieldsUrlParams['surveyid'] = $iSurveyId;
+                    }
+                    if (!empty($iGroupId)) {
+                        $replacementFieldsUrlParams['gid'] = $iGroupId;
+                    }
+                    if (!empty($iQuestionId)) {
+                        $replacementFieldsUrlParams['qid'] = $iQuestionId;
+                    }
+                    /* @var string the replacementfields url */
+                    $replacementFieldsUrl = App()->getController()->createUrl(
+                        'limereplacementfields/index',
+                        $replacementFieldsUrlParams
+                    );
+                    ?>
                     CKEDITOR.on('instanceReady',CKeditor_OnComplete);
                     
-                    var oCKeditor = CKEDITOR.replace( 'MyTextarea' ,  { height	: '350',
-                        width	: '98%',
+                    var oCKeditor = CKEDITOR.replace( 'MyTextarea' ,  {
+                        height : '350',
+                        width : '98%',
                         toolbarStartupExpanded : true,
                         ToolbarCanCollapse : false,
                         toolbar : '<?php echo $toolbarname; ?>',
-                        LimeReplacementFieldsSID : "<?php echo $iSurveyId; ?>",
-                        LimeReplacementFieldsGID : "<?php echo $iGroupId; ?>",
-                        LimeReplacementFieldsQID : "<?php echo $iQuestionId; ?>",
-                        LimeReplacementFieldsType: "<?php echo $sFieldType; ?>",
-                        LimeReplacementFieldsAction: "<?php echo $sAction; ?>",
-                        LimeReplacementFieldsPath : "<?php echo $this->createUrl("/limereplacementfields/index"); ?>",
+                        LimeReplacementFieldsUrl : "<?php echo $replacementFieldsUrl; ?>",
                         language : "<?php echo $ckLanguage ?>"
                         <?php echo !is_null($contentsLangDirection) ? ",contentsLangDirection: '{$contentsLangDirection}'" : ''; ?>
                         <?php echo $htmlformatoption; ?> });
@@ -72,22 +90,15 @@
                     var oEditor = CKEDITOR.instances['MyTextarea'];
 
                     <?php
-                    if (in_array($sFieldType, array('editanswer', 'addanswer', 'editlabel', 'addlabel')))
-                    {
+                    if (in_array($sFieldType, array('editanswer', 'addanswer', 'editlabel', 'addlabel'))) {
                     ?>
-
                     var editedtext = oEditor.getData().replace(new RegExp( "\n", "g" ),'');
                     var editedtext = oEditor.getData().replace(new RegExp( "\r", "g" ),'');
-
                     <?php
-                    }
-                    else
-                    {
+                    } else {
                     ?>
-
                     var editedtext = oEditor.getData('no strip new line'); // adding a parameter avoids stripping \n
-
-                        <?php
+                    <?php
                     }
                     ?>
 

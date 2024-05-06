@@ -7,8 +7,8 @@
         <type>question_theme</type>
         <title>Array</title>
         <creationDate>09/08/2018</creationDate>
-        <author>Dominik Vitt</author>
-        <authorEmail>dominik.vitt@limesurvey.org</authorEmail>
+        <author>LimeSurvey GmbH</author>
+        <authorEmail>info@limesurvey.org</authorEmail>
         <authorUrl>http://www.limesurvey.org</authorUrl>
         <copyright>Copyright (C) 2005 - 2018 LimeSurvey Gmbh, Inc. All rights reserved.</copyright>
         <license>GNU General Public License version 2 or later</license>
@@ -176,7 +176,7 @@
             <i18n>1</i18n>
             <default></default>
             <help>In the printable version the condition is being replaced with this explanation text.</help>
-            <caption>Relevance help for printable survey</caption>
+            <caption>Condition help for printable survey</caption>
             <readonly></readonly>
             <readonly_when_active></readonly_when_active>
         </attribute>
@@ -257,7 +257,7 @@
                 </option>
             </options>
             <default>0</default>
-            <help>Specify how array-filtered sub-questions should be displayed</help>
+            <help>Specify how array-filtered subquestions should be displayed</help>
             <caption>Array filter style</caption>
             <i18n></i18n>
             <readonly></readonly>
@@ -306,6 +306,7 @@
             <sortorder>200</sortorder>
             <inputtype>textarea</inputtype>
             <expression>2</expression>
+            <xssfilter>0</xssfilter>
             <help>Enter a boolean equation to validate the whole question.</help>
             <caption>Question validation equation</caption>
             <i18n></i18n>

@@ -35,15 +35,14 @@
  */
 class SurveyLink extends LSActiveRecord
 {
-
     /**
      * @inheritdoc
      * @return SurveyLink
      */
-    public static function model($class = __CLASS__)
+    public static function model($className = __CLASS__)
     {
         /** @var self $model */
-        $model = parent::model($class);
+        $model = parent::model($className);
         return $model;
     }
 
@@ -65,7 +64,7 @@ class SurveyLink extends LSActiveRecord
         // NOTE: you may need to adjust the relation name and the related
         // class name for the relations automatically generated below.
         return array(
-            'participant' => array(self::HAS_ONE, 'Particiant', 'participant_id'),
+            'participant' => array(self::HAS_ONE, Participant::class, 'participant_id'),
             'survey' => array(self::HAS_ONE, 'Survey', array('sid' => 'survey_id'))
         );
     }
@@ -106,7 +105,7 @@ class SurveyLink extends LSActiveRecord
      *
      * @return bool|CDbDataReader
      */
-    function deleteTokenLink($aTokenIds, $surveyId)
+    public function deleteTokenLink($aTokenIds, $surveyId)
     {
         $query = "DELETE FROM " . SurveyLink::tableName()
             . " WHERE token_id IN (" . implode(", ", $aTokenIds) . ") AND survey_id=:survey_id";

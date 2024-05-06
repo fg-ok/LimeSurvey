@@ -22,7 +22,6 @@
 */
 class RegisterController extends LSYii_Controller
 {
-
     /* @var string : Default layout when using render : leave at bare actually : just send content */
     public $layout = 'survey';
     /* @var string the template name to be used when using layout */
@@ -94,6 +93,7 @@ class RegisterController extends LSYii_Controller
         } else {
             $iSurveyId = Yii::app()->request->getPost('sid');
         }
+        $iSurveyId = (int) $iSurveyId;
 
         $oSurvey = Survey::model()->find("sid=:sid", array(':sid' => $iSurveyId));
         /* Throw 404 if needed */
@@ -134,7 +134,7 @@ class RegisterController extends LSYii_Controller
                     self::sendRegistrationEmail($iSurveyId, $iTokenId);
                 }
                 $oToken = Token::model($iSurveyId)->findByPk($iTokenId)->decrypt();
-                $redirectUrl = Yii::app()->getController()->createUrl('/survey/', array('sid' => $iSurveyId,'token' => $oToken->token, 'lang' => $sLanguage));
+                $redirectUrl = Yii::app()->getController()->createUrl('/survey/index', array('sid' => $iSurveyId,'token' => $oToken->token, 'lang' => $sLanguage));
                 Yii::app()->getController()->redirect($redirectUrl);
                 Yii::app()->end();
             }
@@ -173,7 +173,7 @@ class RegisterController extends LSYii_Controller
         //Check that the email is a valid style address
         if ($aFieldValue['sEmail'] == "") {
             $this->aRegisterErrors[] = gT("You must enter a valid email. Please try again.");
-        } elseif (!validateEmailAddress(trim($aFieldValue['sEmail']))) {
+        } elseif (!validateEmailAddress(trim((string) $aFieldValue['sEmail']))) {
             $this->aRegisterErrors[] = gT("The email you used is not valid. Please try again.");
         }
         //Check and validate attribute
@@ -187,7 +187,7 @@ class RegisterController extends LSYii_Controller
     /**
      * Creates the array for the registration success page
      *
-     * @param Integer $iSurveyId The survey id
+     * @param Integer $iSurveyId The survey ID
      * @param Integer $iTokenId The token id
      *
      * @return array The rendereable array
@@ -195,9 +195,9 @@ class RegisterController extends LSYii_Controller
     public function getRegisterSuccess($iSurveyId, $iTokenId)
     {
         $oSurvey = Survey::model()->findByPk($iSurveyId);
-        
+
         $oToken = Token::model($iSurveyId)->findByPk($iTokenId)->decrypt();
-        
+
         $aData['active'] = $oSurvey->active;
         $aData['iSurveyId'] = $iSurveyId;
         $aData['sLanguage'] = App()->language;
@@ -300,7 +300,7 @@ class RegisterController extends LSYii_Controller
         }
         $aMessage['mail-contact'] = sprintf(gT("Survey administrator %s (%s)"), $aSurveyInfo['adminname'], $aSurveyInfo['adminemail']);
         $this->sMessage = $this->renderPartial('/survey/system/message', array('aMessage' => $aMessage), true);
-        // Allways return true : if we come here, we allways trye to send an email
+        // Always return true : if we come here, we always trye to send an email
         return true;
     }
 
@@ -324,13 +324,13 @@ class RegisterController extends LSYii_Controller
             $oToken->decrypt();
             if ($oToken->usesleft < 1 && $aSurveyInfo['alloweditaftercompletion'] != 'Y') {
                 $this->aRegisterErrors[] = gT("The email address you have entered is already registered and the survey has been completed.");
-            } elseif (strtolower(substr(trim($oToken->emailstatus), 0, 6)) === "optout") {
-                // And global blacklisting ?
+            } elseif (strtolower(substr(trim((string) $oToken->emailstatus), 0, 6)) === "optout") {
+                // And global blocklisting ?
                 {
                 $this->aRegisterErrors[] = gT("This email address cannot be used because it was opted out of this survey.");
                 }
             } elseif (!$oToken->emailstatus && $oToken->emailstatus != "OK") {
-                $this->aRegisterErrors[] = gT("This email address is already registered but the email adress was bounced.");
+                $this->aRegisterErrors[] = gT("This email address is already registered but email to that adress could not be delivered.");
             } else {
                 $this->sMailMessage = gT("The address you have entered is already registered. An email has been sent to this address with a link that gives you access to the survey.");
                 return $oToken->tid;
@@ -338,12 +338,11 @@ class RegisterController extends LSYii_Controller
         } else {
             // TODO : move xss filtering in model
             $oToken = Token::create($iSurveyId);
-            $oToken->firstname = sanitize_xss_string($aFieldValue['sFirstName']);
-            $oToken->lastname = sanitize_xss_string($aFieldValue['sLastName']);
+            $oToken->firstname = $aFieldValue['sFirstName'];
+            $oToken->lastname = $aFieldValue['sLastName'];
             $oToken->email = $aFieldValue['sEmail'];
             $oToken->emailstatus = 'OK';
             $oToken->language = $sLanguage;
-            $aFieldValue['aAttribute'] = array_map('sanitize_xss_string', $aFieldValue['aAttribute']);
             $oToken->setAttributes($aFieldValue['aAttribute']);
             if ($aSurveyInfo['startdate']) {
                 $oToken->validfrom = $aSurveyInfo['startdate'];
@@ -352,6 +351,7 @@ class RegisterController extends LSYii_Controller
                 $oToken->validuntil = $aSurveyInfo['expires'];
             }
             $oToken->generateToken();
+            $oToken->setScenario('register');
             $oToken->encryptSave(true);
             $this->sMailMessage = gT("An email has been sent to the address you provided with access details for this survey. Please follow the link in that email to proceed.");
             return $oToken->tid;
@@ -432,7 +432,7 @@ class RegisterController extends LSYii_Controller
         $this->aReplacementData['sMessage'] = $this->sMessage;
 
         $oTemplate = Template::model()->getInstance('', $iSurveyId);
-        $aSurveyInfo  =  getsurveyinfo($iSurveyId);
+        $aSurveyInfo  =  getsurveyinfo($iSurveyId, $sLanguage);
 
         if ($iTokenId !== null) {
             $aData['aSurveyInfo'] = self::getRegisterSuccess($iSurveyId, $iTokenId);

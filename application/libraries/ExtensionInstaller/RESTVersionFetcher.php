@@ -4,7 +4,7 @@ namespace LimeSurvey\ExtensionInstaller;
 
 /**
  * @since 2018-09-26
- * @author Olle Haerstedt
+ * @author LimeSurvey GmbH
  */
 class RESTVersionFetcher extends VersionFetcher
 {
@@ -70,6 +70,9 @@ class RESTVersionFetcher extends VersionFetcher
         $url .= '&extension_name=' . $this->extensionName;
         $url .= '&extension_type=' . $this->extensionType;
         $ch = curl_init($url);
+        if ($ch === false) {
+            throw new \Exception('Could not open curl handle');
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $content = json_decode(curl_exec($ch));
         curl_close($ch);

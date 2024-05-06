@@ -5,12 +5,12 @@
  * If it does, it means some vendor package was not added to git.
  *
  * @since 2020-03-10
- * @author Olle Haerstedt
+ * @author LimeSurvey GmbH
  */
 
-require_once __DIR__ . '/../third_party/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$packages = include(__DIR__ . '/../third_party/composer/autoload_classmap.php');
+$packages = include(__DIR__ . '/../vendor/composer/autoload_classmap.php');
 
 echo 'Checking all autoloaded classes...' . PHP_EOL;
 

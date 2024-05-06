@@ -6,11 +6,14 @@
 */
 
 require_once(dirname(dirname(__FILE__)) . '/helpers/globals.php');
+require_once __DIR__ . '/Traits/LSApplicationTrait.php';
 
 use LimeSurvey\PluginManager\LimesurveyApi;
 
 class ConsoleApplication extends CConsoleApplication
 {
+    use LSApplicationTrait;
+
     protected $config = array();
 
     /**
@@ -171,6 +174,29 @@ class ConsoleApplication extends CConsoleApplication
         $this->config[$name] = $value;
     }
 
+
+    /**
+     * @return CAssetManager the asset manager component
+     */
+    public function getAssetManager()
+    {
+        return $this->getComponent('assetManager');
+    }
+
+    /**
+     * Returns the client script manager.
+     *
+     * @return CClientScript the client script manager
+     */
+    public function getClientScript()
+    {
+        return $this->getComponent('clientScript');
+    }
+
+    /**
+     * Returns the plugin manager
+     * @return IApplicationComponent
+     */
     public function getPluginManager()
     {
         return $this->getComponent('pluginManager');

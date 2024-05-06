@@ -54,7 +54,7 @@ class NoGreenBarTest extends TestBaseClassWeb
         sleep(1);
         self::ignoreAdminNotification();
         self::ignoreAdminNotification();
-        $savebutton = $web->findById('save-button');
+        $savebutton = $web->findById('save-and-close-button');
         $savebutton->click();
         sleep(1);
     }
@@ -69,6 +69,7 @@ class NoGreenBarTest extends TestBaseClassWeb
             $web->findById('breadcrumb-container');
             $this->assertTrue(true, 'Found green bar');
         } catch (NoSuchElementException $ex) {
+            self::$testHelper->takeScreenshot(self::$webDriver, __CLASS__ . '_' . __FUNCTION__);
             $this->assertTrue(false, 'Found no green bar, NoSuchElementException');
         }
     }

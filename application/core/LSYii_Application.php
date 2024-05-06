@@ -18,6 +18,9 @@
  */
 
 require_once(dirname(dirname(__FILE__)) . '/helpers/globals.php');
+require_once __DIR__ . '/Traits/LSApplicationTrait.php';
+
+use LimeSurvey\Yii\Application\AppErrorHandler;
 
 /**
 * Implements global config
@@ -36,6 +39,8 @@ require_once(dirname(dirname(__FILE__)) . '/helpers/globals.php');
 */
 class LSYii_Application extends CWebApplication
 {
+    use LSApplicationTrait;
+
     protected $config = array();
 
     /**
@@ -55,6 +60,9 @@ class LSYii_Application extends CWebApplication
      * @var integer|null
      */
     protected $dbVersion;
+
+    /* @var integer| null the current userId for all action */
+    private $currentUserId;
 
     /**
      *
@@ -81,7 +89,6 @@ class LSYii_Application extends CWebApplication
             $aApplicationConfig['runtimePath'] = $baseConfig['tempdir'] . DIRECTORY_SEPARATOR . 'runtime';
         } /* No need to test runtimePath validity : Yii return an exception without issue */
 
-
         /* If LimeSurvey is configured to load custom Twig exstensions, add them to Twig Component */
         if (array_key_exists('use_custom_twig_extensions', $baseConfig) && $baseConfig ['use_custom_twig_extensions']) {
             $aApplicationConfig = $this->getTwigCustomExtensionsConfig($baseConfig['usertwigextensionrootdir'], $aApplicationConfig);
@@ -92,7 +99,8 @@ class LSYii_Application extends CWebApplication
 
         /* Because we have app now : we have to call again the config (usage of Yii::app() for publicurl) */
         $this->setConfigs();
-
+        /* Since session can be set by DB : need to be set again … */
+        $this->setSessionByDB($aApplicationConfig);
 
         /* Update asset manager path and url only if not directly set in aApplicationConfig (from config.php),
          *  must do after reloading to have valid publicurl (the tempurl) */
@@ -102,6 +110,9 @@ class LSYii_Application extends CWebApplication
         if (!isset($aApplicationConfig['components']['assetManager']['basePath'])) {
             App()->getAssetManager()->setBasePath($this->config['tempdir'] . '/assets');
         }
+
+        // Load common helper
+        $this->loadHelper("common");
     }
 
     /* @inheritdoc */
@@ -282,9 +293,19 @@ class LSYii_Application extends CWebApplication
      */
     public function getConfig($name, $default = false)
     {
-        return isset($this->config[$name]) ? $this->config[$name] : $default;
+        return $this->config[$name] ?? $default;
     }
 
+    /**
+     * Returns the array of available configurations
+     *
+     * @access public
+     * @return array
+     */
+    public function getAvailableConfigs()
+    {
+        return $this->config;
+    }
 
     /**
      * For future use, cache the language app wise as well.
@@ -298,12 +319,11 @@ class LSYii_Application extends CWebApplication
         // This method is also called from AdminController and LSUser
         // But if a param is defined, it should always have the priority
         // eg: index.php/admin/authentication/sa/login/&lang=de
-        if ($this->request->getParam('lang') !== null && in_array('authentication', explode('/', Yii::app()->request->url))) {
+        if ($this->request->getParam('lang') !== null && in_array('authentication', explode('/', (string) Yii::app()->request->url))) {
             $sLanguage = $this->request->getParam('lang');
         }
 
-        $sLanguage = preg_replace('/[^a-z0-9-]/i', '', $sLanguage);
-        $this->messages->catalog = $sLanguage;
+        $sLanguage = preg_replace('/[^a-z0-9-]/i', '', (string) $sLanguage);
         App()->session['_lang'] = $sLanguage; // See: http://www.yiiframework.com/wiki/26/setting-and-maintaining-the-language-in-application-i18n/
         parent::setLanguage($sLanguage);
     }
@@ -383,43 +403,18 @@ class LSYii_Application extends CWebApplication
      */
     public function onException($event)
     {
-        if (!Yii::app() instanceof CWebApplication) {
-            /* Don't update for CLI */
-            return;
-        }
-        if (defined('PHP_ENV') && PHP_ENV == 'test') {
-            // If run from phpunit, die with exception message.
-            die($event->exception->getMessage());
-        }
-        if (!$this->dbVersion) {
-            /* Not installed or DB broken or to old */
-            return;
-        }
-        if ($this->dbVersion < 200) {
-            /* Activate since DBVersion for 2.50 and up (i know it include previous line, but stay clear) */
-            return;
-        }
-        if (
-            Yii::app()->request->isAjaxRequest &&
-            $event->exception instanceof CHttpException
-        ) {
-            header('Content-Type: application/json');
-            http_response_code($event->exception->statusCode);
-            die(json_encode(['message' => $event->exception->getMessage()]));
-        }
-        $statusCode = isset($event->exception->statusCode) ? $event->exception->statusCode : null; // Needed ?
-        if (Yii::app()->getConfig('debug') > 1) {
-            /* Can restrict to admin ? */
-            /* debug ro 2 : always send Yii debug even 404 */
-            return;
-        }
-        if (Yii::app()->getConfig('debug') > 0 && $statusCode != '404') {
-            /* debug is set and not a 404 : always send Yii debug*/
-            return;
-        }
-        Yii::app()->setComponent('errorHandler', array(
-            'errorAction' => 'surveys/error',
-        ));
+        (new AppErrorHandler)->onException($this->dbVersion, $event);
+    }
+
+    /**
+     * @see http://www.yiiframework.com/doc/api/1.1/CApplication#onError-detail
+
+     * @param CErrorEvent $event
+     * @return void
+     */
+    public function onError($event)
+    {
+        (new AppErrorHandler)->onError($this->dbVersion, $event);
     }
 
     /**
@@ -440,7 +435,6 @@ class LSYii_Application extends CWebApplication
         }
         $realFilePath = realpath($filePath);
         $baseDir = realpath($baseDir);
-        
         if (!is_file($realFilePath)) {
             /* Not existing file */
             Yii::log("Try to read invalid file " . $filePath, 'warning', 'application.security.files.is_file');
@@ -473,7 +467,7 @@ class LSYii_Application extends CWebApplication
         $files = array();
 
         foreach ($iterator as $info) {
-            $ext = pathinfo($info->getPathname(), PATHINFO_EXTENSION);
+            $ext = pathinfo((string) $info->getPathname(), PATHINFO_EXTENSION);
             if ($ext == 'xml') {
                 $CustomTwigExtensionsManifestFiles[] = $info->getPathname();
             }
@@ -514,5 +508,87 @@ class LSYii_Application extends CWebApplication
         }
 
         return $aApplicationConfig;
+    }
+
+    /**
+     * @inheritdoc
+     * Special handling for SEO friendly URLs
+     */
+    public function createController($route, $owner=null)
+    {
+        $controller = parent::createController($route, $owner);
+
+        // If no controller is found by standard ways, check if the route matches
+        // an existing survey's alias.
+        if (is_null($controller)) {
+            $controller = $this->createControllerFromShortUrl($route);
+        }
+
+        return $controller;
+    }
+
+    /**
+     * Create controller from short url if the route matches a survey alias.
+     * @param string $route the route of the request.
+     * @return array<mixed>|null
+     */
+    private function createControllerFromShortUrl($route)
+    {
+        $route = ltrim($route, "/");
+        $alias = explode("/", $route)[0];
+        if (empty($alias)) {
+            return null;
+        }
+
+        // When updating from versions that didn't support short urls, this code runs before the update process,
+        // so we cannot asume the field exists. We try to retrieve the Survey Language Settings and, if it fails,
+        // just don't do anything.
+        try {
+            $criteria = new CDbCriteria();
+            $criteria->addCondition('surveyls_alias = :alias');
+            $criteria->params[':alias'] = $alias;
+            $criteria->index = 'surveyls_language';
+
+            $languageSettings = SurveyLanguageSetting::model()->find($criteria);
+        } catch (CDbException $ex) {
+            // It's probably just because the field doesn't exist, so don't do anything.
+        }
+
+        if (empty($languageSettings)) {
+            return null;
+        }
+
+        // If no language is specified in the request, add a GET param based on the survey's language for this alias
+        $language = $this->request->getParam('lang');
+        if (empty($language)) {
+            $_GET['lang'] = $languageSettings->surveyls_language;
+        }
+        return parent::createController("survey/index/sid/" . $languageSettings->surveyls_survey_id);
+    }
+
+    /**
+     * Set the session after start,
+     * Limited to DbHttpSession
+     * @param array Application config
+     * @return void
+     */
+    private function setSessionByDB($aApplicationConfig)
+    {
+        if (empty($aApplicationConfig['components']['session']['class'])) {
+            /* No specific session */
+            return;
+        }
+        if ($aApplicationConfig['components']['session']['class'] != "application.core.web.DbHttpSession") {
+            /* Not included DbHttpSession */
+            return;
+        }
+        if (!empty($aApplicationConfig['components']['session']['cookieParams']['lifetime'])) {
+            /* lifetime already updated */
+            return;
+        }
+        $lifetime = intval(App()->getConfig('iSessionExpirationTime', ini_get('session.cookie_lifetime')));
+        App()->getSession()->setCookieParams([
+            'lifetime' => $lifetime
+        ]);
     }
 }

@@ -1,86 +1,76 @@
 <?php
 /* @var $this SurveysGroupsController */
+
 /* @var $model SurveysGroups */
 ?>
-
-<div class="col-lg-12 list-surveys">
-
-    <div class="row">
+<div class="row">
+    <div class="col-12 list-surveys">
         <ul class="nav nav-tabs" id="surveygrouptabsystem" role="tablist">
-            <li class="active">
-                <a href="#surveysInThisGroup">
+            <li class="nav-item">
+                <a class="nav-link active" href="#surveysInThisGroup" data-bs-toggle="tab">
                     <?php eT('Surveys in this group'); ?>
                 </a>
             </li>
-            <?php if($model->hasPermission('group','read')):?>
-                <li>
-                    <a href="#settingsForThisGroup">
+            <?php if ($model->hasPermission('group', 'read')): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="#settingsForThisGroup" data-bs-toggle="tab">
                         <?php eT('Settings for this survey group'); ?>
                     </a>
                 </li>
-            <?php endif;?>
-            <li>
-                <a href="#templateSettingsFortThisGroup">
+            <?php endif; ?>
+            <li class="nav-item">
+                <a class="nav-link" href="#templateSettingsFortThisGroup" data-bs-toggle="tab">
                     <?php eT('Themes options for this survey group'); ?>
                 </a>
             </li>
         </ul>
         <div class="tab-content">
-            <div id="surveysInThisGroup" class="tab-pane active">
+            <div id="surveysInThisGroup" class="tab-pane show active">
                 <div class="list-surveys">
                     <h2><?php eT('Surveys in this group:'); ?></h2>
                     <?php
-                        $this->widget('ext.admin.survey.ListSurveysWidget.ListSurveysWidget', array(
-                                    'model'            => $oSurveySearch,
-                                    'bRenderSearchBox' => false,
-                                ));
+                    $this->widget('ext.admin.survey.ListSurveysWidget.ListSurveysWidget',
+                        array(
+                            'model' => $oSurveySearch,
+                            'bRenderSearchBox' => false,
+                        )
+                    );
                     ?>
                 </div>
             </div>
-            <?php if($model->hasPermission('group','read')):?>
+            <?php if ($model->hasPermission('group', 'read')): ?>
                 <div id="settingsForThisGroup" class="tab-pane">
                     <?php $this->renderPartial('./surveysgroups/_form', $_data_); ?>
                 </div>
-            <?php endif;?>
+            <?php endif; ?>
             <div id="templateSettingsFortThisGroup" class="tab-pane">
                 <?php
-                    if (is_a($templateOptionsModel, 'TemplateConfiguration')){
-                        Yii::app()->getController()->renderPartial('/themeOptions/surveythemelist', array( 'oSurveyTheme'=> $templateOptionsModel, 'pageSize'=>$pageSize ));
-                    }
+                if (is_a($templateOptionsModel, 'TemplateConfiguration')) {
+                    Yii::app()->getController()->renderPartial(
+                        '/themeOptions/surveythemelist',
+                        array(
+                            'oSurveyTheme' => $templateOptionsModel,
+                            'pageSize' => $pageSize,
+                            'SurveysGroup' => $model
+                        )
+                    );
+                }
                 ?>
             </div>
-
         </div>
     </div>
 </div>
 <script>
-
     $('#surveygrouptabsystem a').click(function (e) {
-        window.location.hash = $(this).attr('href');
-        $("surveygrouptabsystem.last a").unbind('click');
-
-        if($(this).attr('href') == '#surveysInThisGroup'){
-            e.preventDefault();
-            $(this).tab('show');
-        } else if($(this).attr('href') == '#settingsForThisGroup'){
-            //e.preventDefault();
+        var target = $(e.target).attr('href');
+        if (target == '#surveysInThisGroup') {
             $('#save-form-button, #save-and-close-form-button').attr('data-form-id', 'surveys-groups-form');
-            $(this).tab('show');
-        } else if($(this).attr('href') == '#securityForThisGroup'){
-            e.preventDefault();
+        } else if (target == '#settingsForThisGroup') {
+            $('#save-form-button, #save-and-close-form-button').attr('data-form-id', 'surveys-groups-form');
+        } else if (target == '#securityForThisGroup') {
             $('#save-form-button, #save-and-close-form-button').attr('data-form-id', 'surveys-groups-permission');
-            $(this).tab('show');
-        } else if($(this).attr('href') == '#templateSettingsFortThisGroup'){
-            e.preventDefault();
+        } else if (target == '#templateSettingsFortThisGroup') {
             $('#save-form-button, #save-and-close-form-button').attr('data-form-id', 'template-options-form');
-            $(this).tab('show');
         }
     });
-
-    $(document).on('ready pjax:scriptcomplete', function(){
-        if(window.location.hash){
-            $('#surveygrouptabsystem').find('a[href='+window.location.hash+']').trigger('click');
-        }
-
-    })
 </script>

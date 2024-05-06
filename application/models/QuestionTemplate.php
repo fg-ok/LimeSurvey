@@ -103,7 +103,7 @@ class QuestionTemplate extends CFormModel
     {
         if (!isset($this->aViews[$sView])) {
             $sTemplatePath = $this->getTemplatePath();
-            if (is_file("$sTemplatePath/$sView.twig")) {
+            if (!empty($sTemplatePath) && is_file("$sTemplatePath/$sView.twig")) {
                 $this->aViews[$sView] = true;
             } else {
                 $this->aViews[$sView] = false;
@@ -113,8 +113,8 @@ class QuestionTemplate extends CFormModel
     }
 
     /**
-     * Retrieve the template base path
-     * @return string
+     * Retrieve the template base path if exist
+     * @return null|string
      */
     public function getTemplatePath()
     {
@@ -176,7 +176,7 @@ class QuestionTemplate extends CFormModel
     /**
      * Register a core css file
      * @param string $sCssFile
-     * @param int $media
+     * @param string $media
      */
     public function registerCssFile($sCssFile, $media = '')
     {
@@ -262,6 +262,9 @@ class QuestionTemplate extends CFormModel
         if (!isset($this->oConfig)) {
             $oQuestion                    = $this->oQuestion;
             $sTemplatePath                = $this->getTemplatePath();
+            if (empty($sTemplatePath)) {
+                return;
+            }
             $sFolderName                  = self::getFolderName($oQuestion->type);
             $this->sTemplateQuestionPath  = $sTemplatePath . '/survey/questions/answer/' . $sFolderName;
             $xmlFile                      = $this->sTemplateQuestionPath . '/config.xml';
@@ -278,11 +281,12 @@ class QuestionTemplate extends CFormModel
                 $this->bHasCustomAttributes    = !empty($this->oConfig->attributes);
 
                 // Set the custom attributes
+                // In QuestionTheme set at a complete array using json_decode(json_encode((array)$xml_config->attributes), true);
                 if ($this->bHasCustomAttributes) {
                     $this->aCustomAttributes = array();
                     foreach ($this->oConfig->attributes->attribute as $oCustomAttribute) {
                         $attribute_name = (string) $oCustomAttribute->name;
-                        if (isset($oCustomAttribute->i18n) && $oCustomAttribute->i18n) {
+                        if (isset($oCustomAttribute->i18n) && strval($oCustomAttribute->i18n)) {
                             $sLang = App()->language;
                             $oAttributeValue = QuestionAttribute::model()->find("qid=:qid and attribute=:custom_attribute and language =:language", array('qid' => $oQuestion->qid, 'custom_attribute' => $attribute_name, 'language' => $sLang));
                         } else {
@@ -377,9 +381,12 @@ class QuestionTemplate extends CFormModel
      * @param string $type
      * @return array
      * @todo Move to QuestionTheme?
+     * @todo This is not the same as QuestionTheme::findQuestionMetaDataForAllTypes() which is the database layer
+     * @todo this should check the filestructure instead of the database as this is the filestructure layer
      */
     public static function getQuestionTemplateList($type)
     {
+        // todo: incorrect, this should check the filestructure instead of the database as this is the filestructure layer
         /** @var QuestionTheme[] */
         $questionThemes = QuestionTheme::model()->findAllByAttributes(
             [],

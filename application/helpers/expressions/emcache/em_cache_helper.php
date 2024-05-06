@@ -5,7 +5,7 @@
  * PR: https://github.com/LimeSurvey/LimeSurvey/pull/1273
  *
  * @since 2019-05-23
- * @author Olle Haerstedt
+ * @author LimeSurvey GmbH
  */
 class EmCacheHelper
 {
@@ -134,7 +134,7 @@ class EmCacheHelper
 
         // Check subquestions etc.
         foreach (array_keys($session) as $key) {
-            if (strpos($key, $ia[1]) !== false) {
+            if (strpos($key, (string) $ia[1]) !== false) {
                 if (!empty($session[$key])) {
                     // Found subquestion answer, do not use cache.
                     return false;

@@ -29,7 +29,7 @@ class LSYii_ImageValidator
     {
         if (is_array($file)) {
             $path = $file['tmp_name'];
-            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $extension = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
             $type = $file['type'];
         } elseif (is_string($file)) {
             $parts = explode('.', $file);
@@ -48,7 +48,7 @@ class LSYii_ImageValidator
         $result = [];
 
         /** @var ?? */
-        $checkImage = CFileHelper::getMimeType($path);
+        $checkImage = CFileHelper::getMimeType($path, null, false); // Don't fallback to checking the file extension because the tmp file name doesn't have one.
         $result['debug'] = $checkImage;
 
         // TODO: Why hard-coded?
@@ -60,21 +60,28 @@ class LSYii_ImageValidator
             "image/ico",
             "image/gif",
             "image/svg+xml",
+            "image/svg",
             "image/x-icon",
             "image/vnd.microsoft.icon"
         );
 
         if (
             !empty($checkImage)
-            && in_array($extension, explode(",", Yii::app()->getConfig('allowedthemeimageformats')))
+            && in_array($extension, explode(",", (string) Yii::app()->getConfig('allowedthemeimageformats')))
             && in_array($checkImage, $allowedImageFormats)
-            && in_array(strtolower($type), $allowedImageFormats)
+            && in_array(strtolower((string) $type), $allowedImageFormats)
         ) {
             $result['uploadresult'] = '';
             $result['check'] = true;
         } else {
-            $result['uploadresult'] = sprintf(gT("This file is not a supported image format - only the following ones are allowed: %s"),strtoupper(Yii::app()->getConfig('allowedthemeimageformats')));
-            $result['check'] = false;
+            // If $checkImage is empty, it's most probably because fileinfo is missing. But we check it to be sure.
+            if (is_null($checkImage) && !function_exists('finfo_open')) {
+                $result['uploadresult'] = gT("Fileinfo PHP extension is not installed. Couldn't validate the image format of the file.");
+                $result['check'] = false;
+            } else {
+                $result['uploadresult'] = sprintf(gT("This file is not a supported image format - only the following ones are allowed: %s"), strtoupper((string) Yii::app()->getConfig('allowedthemeimageformats')));
+                $result['check'] = false;
+            }
         }
         return $result;
     }

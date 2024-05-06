@@ -5,7 +5,7 @@
  * Current project stance is only to serve pregenerated tutorials bay LimeSurvey Company.
  * @TODO: Make this user editable
  */
-class TutorialsController extends Survey_Common_Action
+class TutorialsController extends SurveyCommonAction
 {
     /**
      * @return string[] action filters
@@ -91,7 +91,7 @@ class TutorialsController extends Survey_Common_Action
             }
         }
 
-        $this->_renderWrappedTemplate(
+        $this->renderWrappedTemplate(
             null,
             array('tutorials/create'),
             array(
@@ -119,7 +119,7 @@ class TutorialsController extends Survey_Common_Action
             }
         }
 
-        $this->_renderWrappedTemplate(
+        $this->renderWrappedTemplate(
             null,
             array('tutorials/update'),
             array(
@@ -139,7 +139,7 @@ class TutorialsController extends Survey_Common_Action
 
         // if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
         if (!isset($_GET['ajax'])) {
-            $this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+            $this->redirect($_POST['returnUrl'] ?? array('admin'));
         }
     }
 
@@ -149,7 +149,7 @@ class TutorialsController extends Survey_Common_Action
         $oTutorial->setFinished(App()->user->id);
         echo '{"success": true}';
     }
-    
+
     public function index()
     {
         $this->getController()->redirect(array('admin/tutorials/sa/view'));
@@ -162,7 +162,7 @@ class TutorialsController extends Survey_Common_Action
         $data = array();
         $data['model'] = Tutorial::model();
         //App()->getClientScript()->registerPackage('surveymenufunctions');
-        $this->_renderWrappedTemplate(null, array('tutorials/index'), $data);
+        $this->renderWrappedTemplate(null, array('tutorials/index'), $data);
     }
 
     /**

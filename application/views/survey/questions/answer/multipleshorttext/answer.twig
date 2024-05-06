@@ -1,6 +1,6 @@
 {#
 /**
- * Multiple Short Text question Html
+ * Multiple short text question Html
  *
  * @var $sRows      : the rows, generated with the views rows/answer_row*.php
  *
@@ -15,7 +15,7 @@
     {% else %}
         {% for aRow in aRows %}
             {% set rowTemplate = (aRow.textarea ? 'survey/questions/answer/multipleshorttext/rows/answer_row_textarea.twig' : 'survey/questions/answer/multipleshorttext/rows/answer_row_inputtext.twig') %}
-            {% include rowTemplate with aRow only %}
+            {% include rowTemplate with aRow %}
         {% endfor %}
     {% endif %}
 

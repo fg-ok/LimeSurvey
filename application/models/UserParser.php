@@ -3,7 +3,7 @@
 /**
  * Importing class to get users from a CSV file
  *
- * @author Markus Flür <markus.fluer@limesurvey.org>
+ * @author LimeSurvey GmbH <info@limesurvey.org>
  * @license GPL3.0
  */
 class UserParser
@@ -18,11 +18,11 @@ class UserParser
     {
         $sRandomFileName = randomChars(20);
         $sFilePath = Yii::app()->getConfig('tempdir') . DIRECTORY_SEPARATOR . $sRandomFileName;
-        $aPathinfo = pathinfo($FILES['the_file']['name']);
+        $aPathinfo = pathinfo((string) $FILES['the_file']['name']);
         $sExtension = $aPathinfo['extension'];
         $bMoveFileResult = false;
-        
- 
+
+
         if ($_FILES['the_file']['error'] == 1 || $_FILES['the_file']['error'] == 2) {
             Yii::app()->setFlashMessage(sprintf(gT("Sorry, this file is too large. Only files up to %01.2f MB are allowed."), getMaximumFileUploadSize() / 1024 / 1024), 'error');
             Yii::app()->getController()->redirect(array('/userManagement/index'));
@@ -55,17 +55,17 @@ class UserParser
         while (($row = fgetcsv($oCSVFile, 0, $delimiter, '"')) !== false) {
             $rowarray = array();
             for ($i = 0; $i < $iHeaderCount; ++$i) {
-                $val = (isset($row[$i]) ? $row[$i] : '');
+                $val = ($row[$i] ?? '');
                 // if Excel was used, it surrounds strings with quotes and doubles internal double quotes.  Fix that.
-                if (preg_match('/^".*"$/', $val)) {
-                    $val = trim(str_replace('""', '"', substr($val, 1, -1)), "\xC2\xA0\n");
+                if (preg_match('/^".*"$/', (string) $val)) {
+                    $val = trim(str_replace('""', '"', substr((string) $val, 1, -1)), "\xC2\xA0\n");
                 }
                 $rowarray[$aFirstLine[$i]] = $val;
             }
             $aToBeAddedUsers[] = $rowarray;
         }
         fclose($oCSVFile);
-        
+
         return $aToBeAddedUsers;
     }
 
@@ -84,7 +84,7 @@ class UserParser
         foreach ($decoded as $data) {
             if (!isset($data["email"]) || !isset($data["users_name"]) || !isset($data["full_name"]) || !isset($data["lang"]) || !isset($data["password"])) {
                 Yii::app()->setFlashMessage(
-                    sprintf(gT("Wrong definition! Please make sure that your JSON arrays contains the fields '%s', '%s', '%s', '%s', and '%s'"), '<b>users_name</b>', '<b>full_name</b>', '<b>email</b>', '<b>lang</b>', '<b>password</b>'),
+                    sprintf(gT("Wrong definition! Please make sure that your JSON arrays contain the fields '%s', '%s', '%s', '%s', and '%s'"), '<b>users_name</b>', '<b>full_name</b>', '<b>email</b>', '<b>lang</b>', '<b>password</b>'),
                     'error'
                 );
                 Yii::app()->getController()->redirect(array('/userManagement/index'));

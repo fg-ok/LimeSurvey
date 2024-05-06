@@ -66,7 +66,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
     if (count($lbl) > 72) {
         $DataSet = array(1 => array(1 => 1));
         if ($cache->IsInCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet) && Yii::app()->getConfig('debug') < 2) {
-            $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
+            $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
         } else {
             $graph = new pChart(690, 200);
             $graph->loadColorPalette($adminThemePath . DIRECTORY_SEPARATOR . 'images/limesurvey.pal');
@@ -74,7 +74,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
             $graph->setFontProperties($rootdir . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'fonts' . DIRECTORY_SEPARATOR . $chartfontfile, $chartfontsize);
             $graph->drawTitle(0, 0, gT('Sorry, but this question has too many answer options to be shown properly in a graph.', 'unescaped'), 30, 30, 30, 690, 200);
             $cache->WriteToCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet, $graph);
-            $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
+            $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
             unset($graph);
         }
         return  $cachefilename;
@@ -82,7 +82,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
     if (array_sum($gdata) == 0) {
         $DataSet = array(1 => array(1 => 1));
         if ($cache->IsInCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet) && Yii::app()->getConfig('debug') < 2) {
-            $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
+            $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
         } else {
             $graph = new pChart(690, 200);
             $graph->loadColorPalette($adminThemePath . DIRECTORY_SEPARATOR . 'images/limesurvey.pal');
@@ -90,7 +90,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
             $graph->setFontProperties($rootdir . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'fonts' . DIRECTORY_SEPARATOR . $chartfontfile, $chartfontsize);
             $graph->drawTitle(0, 0, gT('Sorry, but this question has no responses yet so a graph cannot be shown.', 'unescaped'), 30, 30, 30, 690, 200);
             $cache->WriteToCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet, $graph);
-            $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
+            $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet));
             unset($graph);
         }
         return  $cachefilename;
@@ -131,11 +131,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
 
             $lblout = array();
             if ($sLanguageCode == 'ar') {
-                if (!class_exists('I18N_Arabic_Glyphs', false)) {
-                    $Arabic = new I18N_Arabic('Glyphs');
-                } else {
-                    $Arabic = new I18N_Arabic_Glyphs();
-                }
+                $Arabic = new \ArPHP\I18N\Arabic('Glyphs');
 
                 foreach ($lbl as $kkey => $kval) {
                     if (preg_match("^[A-Za-z]^", $kkey)) {
@@ -162,7 +158,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
             }
 
             if ($cache->IsInCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()) && Yii::app()->getConfig('debug') < 2) {
-                $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
+                $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
             } else {
                 $graph = new pChart(1, 1);
                 $graph->setFontProperties($rootdir . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'fonts' . DIRECTORY_SEPARATOR . $chartfontfile, $chartfontsize);
@@ -195,7 +191,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
                 $graph->drawLegend(510, 30, $DataSet->GetDataDescription(), 250, 250, 250);
 
                 $cache->WriteToCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData(), $graph);
-                $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
+                $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
                 unset($graph);
             }
         }    //end if (bar chart)
@@ -220,12 +216,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
             $lbl = $labelTmp;
 
             if ($sLanguageCode == 'ar') {
-                if (!class_exists('I18N_Arabic_Glyphs', false)) {
-                    $Arabic = new I18N_Arabic('Glyphs');
-                } else {
-                    $Arabic = new I18N_Arabic_Glyphs();
-                }
-
+                $Arabic = new \ArPHP\I18N\Arabic('Glyphs');
                 foreach ($lbl as $kkey => $kval) {
                     if (preg_match("^[A-Za-z]^", $kkey)) {
                         //auto detect if english
@@ -253,7 +244,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
             $DataSet->SetAbsciseLabelSerie("Serie2");
 
             if ($cache->IsInCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()) && Yii::app()->getConfig('debug') < 2) {
-                $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
+                $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
             } else {
                 $gheight = ceil($gheight);
                 $graph = new pChart(690, $gheight);
@@ -268,7 +259,7 @@ function createChart($iQuestionID, $iSurveyID, $type, $lbl, $gdata, $grawdata, $
                 $graph->setFontProperties($rootdir . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'fonts' . DIRECTORY_SEPARATOR . $chartfontfile, $chartfontsize);
                 $graph->drawPieLegend(430, 12, $DataSet->GetData(), $DataSet->GetDataDescription(), 250, 250, 250);
                 $cache->WriteToCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData(), $graph);
-                $cachefilename = basename($cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
+                $cachefilename = basename((string) $cache->GetFileFromCache("graph" . $iSurveyID . $sLanguageCode . $iQuestionID, $DataSet->GetData()));
                 unset($graph);
             }
         }    //end else -> pie charts
@@ -293,7 +284,7 @@ function getQuestionMapData($sField, $qsid)
 
     //loop through question data
     foreach ($aresult as $arow) {
-        $alocation = explode(";", $arow->$sField);
+        $alocation = explode(";", (string) $arow->$sField);
         if (count($alocation) >= 2) {
             $d[] = "{$alocation[0]} {$alocation[1]}";
         }
@@ -320,6 +311,7 @@ function buildSelects($allfields, $surveyid, $language)
     $selects = array();
     $aQuestionMap = array();
     $survey = Survey::model()->findByPk($surveyid);
+    $formatdata = getDateFormatData(Yii::app()->session['dateformat']);
 
     $fieldmap = createFieldMap($survey, "full", false, false, $language);
     foreach ($fieldmap as $field) {
@@ -333,6 +325,8 @@ function buildSelects($allfields, $surveyid, $language)
     for (reset($_POST); $key = key($_POST); next($_POST)) {
         $postvars[] = $key;
     }
+
+    $responseModel = SurveyDynamic::model($surveyid);
 
     /*
     * Iterate through postvars to create "nice" data for SQL later.
@@ -363,11 +357,11 @@ function buildSelects($allfields, $surveyid, $language)
                 * these question types WON'T be handled here:
                 * M = Multiple choice
                 * T - Long free text
-                * Q - Multiple Short Text
+                * Q - Multiple short text
                 * D - Date
-                * N - Numerical Input
+                * N - Numerical input
                 * | - File Upload
-                * K - Multiple Numerical Input
+                * K - Multiple numerical input
                 */
             if (
                 $pv != "sid" && $pv != "display" && $firstletter != "M" && $firstletter != "P" && $firstletter != "T" &&
@@ -378,8 +372,9 @@ function buildSelects($allfields, $surveyid, $language)
                 //put together some SQL here
                 $thisquestion = Yii::app()->db->quoteColumnName($pv) . " IN (";
 
+                $db = Yii::app()->db;
                 foreach ($_POST[$pv] as $condition) {
-                    $thisquestion .= "'$condition', ";
+                    $thisquestion .=  Yii::app()->db->quoteValue(getEncryptedCondition($responseModel, $pv, $condition)) . ", ";
                 }
 
                 $thisquestion = substr($thisquestion, 0, -2)
@@ -400,7 +395,8 @@ function buildSelects($allfields, $surveyid, $language)
                 foreach ($aresult as $arow) {
                     // only add condition if answer has been chosen
                     if (in_array($arow['title'], $_POST[$pv])) {
-                        $mselects[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv)) . $arow['title']) . " = 'Y'";
+                        $fieldname = substr($pv, 1, strlen($pv)) . $arow['title'];
+                        $mselects[] = Yii::app()->db->quoteColumnName($fieldname) . " = " . Yii::app()->db->quoteValue(getEncryptedCondition($responseModel, $fieldname, 'Y'));
                     }
                 }
                 /* If there are mutliple conditions generated from this multiple choice question, join them using the boolean "OR" */
@@ -411,8 +407,8 @@ function buildSelects($allfields, $surveyid, $language)
                 }
             }
 
-                //N - Numerical Input
-                //K - Multiple Numerical Input
+                //N - Numerical input
+                //K - Multiple numerical input
             elseif ($firstletter == "N" || $firstletter == "K") {
                 //value greater than
                 if (substr($pv, strlen($pv) - 1, 1) == "G" && $_POST[$pv] != "") {
@@ -449,14 +445,16 @@ function buildSelects($allfields, $surveyid, $language)
             }
 
                 //T - Long free text
-                //Q - Multiple Short Text
+                //Q - Multiple short text
             elseif (($firstletter == "T" || $firstletter == "Q") && $_POST[$pv] != "") {
                 $selectSubs = array();
                 //We intepret and * and % as wildcard matches, and use ' OR ' and , as the separators
-                $pvParts = explode(",", str_replace('*', '%', str_replace(' OR ', ',', $_POST[$pv])));
+                $pvParts = explode(",", str_replace('*', '%', str_replace(' OR ', ',', (string) $_POST[$pv])));
                 if (is_array($pvParts) and count($pvParts)) {
                     foreach ($pvParts as $pvPart) {
-                        $selectSubs[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv)))." LIKE ".App()->db->quoteValue($pvPart);
+                        $columnName = substr($pv, 1, strlen($pv));
+                        $encryptedValue = getEncryptedCondition($responseModel, $columnName, $pvPart);
+                        $selectSubs[] = Yii::app()->db->quoteColumnName($columnName) . " LIKE " . App()->db->quoteValue($encryptedValue);
                     }
                     if (count($selectSubs)) {
                         $selects[] = ' (' . implode(' OR ', $selectSubs) . ') ';
@@ -466,18 +464,26 @@ function buildSelects($allfields, $surveyid, $language)
 
                 //D - Date
             elseif ($firstletter == "D" && $_POST[$pv] != "") {
+                $datetimeobj = new Date_Time_Converter($_POST[$pv], $formatdata['phpdate'] . ' H:i');
                 //Date equals
                 if (substr($pv, -2) == "eq") {
-                    $selects[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv) - 3)) . " = " . App()->db->quoteValue($_POST[$pv]);
+                    $dateValue = $datetimeobj->convert("Y-m-d");
+                    $columnName = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv) - 3));
+                    $selects[] = $columnName . " >= " . Yii::app()->db->quoteValue($dateValue . " 00:00:00") . " and " . $columnName . " <= " . Yii::app()->db->quoteValue($dateValue . " 23:59:59");
                 } else {
+                    $dateValue = $datetimeobj->convert("Y-m-d H:i");
                     //date less than
-                    if (substr($pv, -4) == "less") {
-                        $selects[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv) - 5)) . " >= " . App()->db->quoteValue($_POST[$pv]);
+                    if (substr($pv, -4) == "more") {
+                        $dateTimeObj = new Date_Time_Converter($_POST[$pv], $formatdata['phpdate'] . ' H:i');
+                        $sDateValue = $dateTimeObj->convert("Y-m-d H:i:s");
+                        $selects[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv) - 5)) . " >= " . App()->db->quoteValue($sDateValue);
                     }
 
                     //date greater than
-                    if (substr($pv, -4) == "more") {
-                        $selects[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv) - 5)) . " <= " . App()->db->quoteValue($_POST[$pv]);
+                    if (substr($pv, -4) == "less") {
+                        $dateTimeObj = new Date_Time_Converter($_POST[$pv], $formatdata['phpdate'] . ' H:i');
+                        $sDateValue = $dateTimeObj->convert("Y-m-d H:i:s");
+                        $selects[] = Yii::app()->db->quoteColumnName(substr($pv, 1, strlen($pv) - 5)) . " <= " . App()->db->quoteValue($sDateValue);
                     }
                 }
             }
@@ -485,7 +491,6 @@ function buildSelects($allfields, $surveyid, $language)
                 //check for datestamp of given answer
             elseif (substr($pv, 0, 9) == "datestamp") {
                 //timestamp equals
-                $formatdata = getDateFormatData(Yii::app()->session['dateformat']);
                 if (substr($pv, -1, 1) == "E" && !empty($_POST[$pv])) {
                     $datetimeobj = new Date_Time_Converter($_POST[$pv], $formatdata['phpdate'] . ' H:i');
                     $sDateValue = $datetimeobj->convert("Y-m-d");
@@ -528,6 +533,13 @@ function square($number)
     return $squarenumber;
 }
 
+function getEncryptedCondition($responseModel, $attribute, $value)
+{
+    $attributes = [$attribute => $value];
+    $attributes = $responseModel->encryptAttributeValues($attributes);
+    return $attributes[$attribute] ?? $value;
+}
+
 class statistics_helper
 {
     /**
@@ -564,7 +576,7 @@ class statistics_helper
      *
      * @param string $rt The code passed from the statistics form listing the field/answer (SGQA) combination to be displayed
      * @param mixed $language The language to present output in
-     * @param mixed $surveyid The survey id
+     * @param mixed $surveyid The survey ID
      * @param string $outputType
      * @param boolean $browse
      *
@@ -578,12 +590,16 @@ class statistics_helper
      */
     protected function buildOutputList($rt, $language, $surveyid, $outputType, $sql, $oLanguage, $browse = true)
     {
+        $language = sanitize_languagecode($language);
+        $surveyid = (int) $surveyid;
+
         //Set up required variables
         $survey = Survey::model()->findByPk($surveyid);
         $alist = array();
         $qtitle = "";
         $qquestion = "";
         $qtype = "";
+        $subquestionText = "";
         $sQuestionType = substr($rt, 0, 1);
         $fieldmap = createFieldMap($survey, "full", false, false, $language);
         $sDatabaseType = Yii::app()->db->getDriverName();
@@ -606,25 +622,25 @@ class statistics_helper
         //M - Multiple choice, therefore multiple fields - one for each answer
         if ($sQuestionType == "M" || $sQuestionType == "P") {
             //get SGQ data
-            list($qsid, $qgid, $qqid) = explode("X", substr($rt, 1, strlen($rt)), 3);
+            [$qsid, $qgid, $qqid] = explode("X", substr($rt, 1, strlen($rt)), 3);
 
             //select details for this question
             $nresult = Question::model()->find('parent_qid=0 AND qid=:qid', array(':qid' => $qqid));
-            $qtitle = $nresult->title;
-            $qtype = $nresult->type;
-            $qquestion = flattenText($nresult->questionl10ns[$language]->question);
             $qother = 'N';
             if (!empty($nresult)) {
+                $qtitle = $nresult->title;
+                $qtype = $nresult->type;
+                $qquestion = flattenText($nresult->questionl10ns[$language]->question);
                 $qother = $nresult->other;
             }
 
 
             //1. Get list of answers
-            $result = Question::model()->findAll(array('order' => 'question_order',
+            $rows = Question::model()->findAll(array('order' => 'question_order',
                 'condition' => 'parent_qid=:qid AND scale_id=0',
                 'params' => array(':qid' => $qqid)
             ));
-            foreach ($result as $row) {
+            foreach ($rows as $row) {
                 $mfield = substr($rt, 1, strlen($rt)) . $row['title'];
                 $alist[] = array($row['title'], flattenText($row->questionl10ns[$language]->question), $mfield);
             }
@@ -655,7 +671,7 @@ class statistics_helper
                 // This question type then can provide a % of the question answered in the summary.
                 $alist[] = array("Answer", gT("Answer"), $mfield);
                 $alist[] = array("NoAnswer", gT("No answer"), $mfield);
-                if ($qtype == Question::QT_SEMICOLON_ARRAY_MULTI_FLEX_TEXT) {
+                if ($qtype == Question::QT_SEMICOLON_ARRAY_TEXT) {
                     $qqid = $fielddata['qid']; // setting $qqid variable to parent qid enables graph for Array Text to be shown
                 }
             }
@@ -694,11 +710,13 @@ class statistics_helper
             $alist[] = array("NoAnswer", gT("No answer"), $mfield);
         }
 
-        //RANKING OPTION
+        // Ranking OPTION
         elseif ($sQuestionType == "R") {
             //getting the needed IDs somehow
             $lengthofnumeral = substr($rt, strpos($rt, "-") + 1, 1);
             list($qsid, $qgid, $qqid) = explode("X", substr($rt, 1, strpos($rt, "-") - ($lengthofnumeral + 1)), 3);
+
+            $qqid = (int) $qqid;
 
             //get question data
             $nquery = "SELECT title, type, question FROM {{questions}} q JOIN {{question_l10ns}} l ON q.qid = l.qid WHERE q.parent_qid=0 AND q.qid='$qqid' AND l.language='{$language}'";
@@ -714,10 +732,10 @@ class statistics_helper
 
             //get answers
             $query = "SELECT code, answer FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid WHERE a.qid='$qqid' AND a.scale_id=0 AND l.language='{$language}' ORDER BY a.sortorder, l.answer";
-            $result = Yii::app()->db->createCommand($query)->query();
+            $rows = Yii::app()->db->createCommand($query)->query();
 
             //loop through answers
-            foreach ($result->readAll() as $row) {
+            foreach ($rows->readAll() as $row) {
                 $row = array_values($row);
                 //create an array containing answer code, answer and fieldname(??)
                 $mfield = substr($rt, 1, strpos($rt, "-") - 1);
@@ -730,10 +748,7 @@ class statistics_helper
             list($qsid, $qgid, $qqid) = explode("X", substr($rt, 1, strlen($rt)), 3);
 
             //select details for this question
-            /**
-            FIXME $iQuestionIDlength not defined!!
-             */
-            $nresult = Question::model()->find('language=:language AND parent_qid=0 AND qid=:qid', array(':language' => $language, ':qid' => substr($qqid, 0, $iQuestionIDlength)));
+            $nresult = Question::model()->find('language=:language AND parent_qid=0 AND qid=:qid', array(':language' => $language, ':qid' => substr($qqid, 0)));
             $qtitle = $nresult->title;
             $qtype = $nresult->type;
             $qquestion = flattenText($nresult->question);
@@ -752,26 +767,25 @@ class statistics_helper
             // 2)      Number of respondents who uploaded at least one file (with the inverse being the number of respondents who didn t upload any)
             $fieldname = substr($rt, 1, strlen($rt));
             $query = "SELECT SUM(" . Yii::app()->db->quoteColumnName($fieldname . '_filecount') . ") as sum, AVG(" . Yii::app()->db->quoteColumnName($fieldname . '_filecount') . ") as avg FROM {{survey_$surveyid}}";
-            $result = Yii::app()->db->createCommand($query)->query();
+            $rows = Yii::app()->db->createCommand($query)->query();
 
             $showem = array();
 
-            foreach ($result->readAll() as $row) {
+            foreach ($rows->readAll() as $row) {
                 $showem[] = array(gT("Total number of files"), $row['sum']);
                 $showem[] = array(gT("Average no. of files per respondent"), $row['avg']);
             }
 
-
-            $query = "SELECT " . $fieldname . " as json FROM {{survey_$surveyid}}";
-            $result = Yii::app()->db->createCommand($query)->query();
+            $query = "SELECT " . Yii::app()->db->quoteColumnName($fieldname) . " as json FROM {{survey_$surveyid}}";
+            $rows = Yii::app()->db->createCommand($query)->query();
 
             $responsecount = 0;
             $filecount = 0;
             $size = 0;
 
-            foreach ($result->readAll() as $row) {
+            foreach ($rows->readAll() as $row) {
                 $json = $row['json'];
-                $phparray = json_decode($json);
+                $phparray = json_decode((string) $json);
 
                 foreach ($phparray as $metadata) {
                     $size += (int) $metadata->size;
@@ -799,7 +813,7 @@ class statistics_helper
             //outputting
             switch ($outputType) {
                 case 'xls':
-                    $xlsTitle = sprintf(gT("Summary for %s"), html_entity_decode($qtitle, ENT_QUOTES, 'UTF-8'));
+                    $xlsTitle = sprintf(gT("Summary for %s"), html_entity_decode((string) $qtitle, ENT_QUOTES, 'UTF-8'));
                     $xlsDesc = html_entity_decode($qquestion, ENT_QUOTES, 'UTF-8');
                     $this->xlsRow++;
                     $this->xlsRow++;
@@ -820,7 +834,7 @@ class statistics_helper
 
                 case 'html':
                     $statisticsoutput .= "\n<table class='statisticstable table table-bordered >\n"
-                    . "\t<thead><tr class='success'><th style='text-align: center; '><strong>" . sprintf(gT("Summary for %s"), $qtitle) . ":</strong>"
+                    . "\t<thead><tr><th style='text-align: center; '><strong>" . sprintf(gT("Summary for %s"), $qtitle) . ":</strong>"
                     . "</th></tr>\n"
                     . "\t<tr><th colspan='2' align='right'><strong>$qquestion</strong></th></tr>\n"
                     . "\t<tr>\n\t\t<th width='50%' align='right' ><strong>"
@@ -828,7 +842,7 @@ class statistics_helper
                     . "\t\t<th width='50%' align='right' ><strong>"
                     . gT("Result") . "</strong></th>\n"
                     . "\t</tr></thead>\n"
-                    ."<tbody>\n";
+                    . "<tbody>\n";
 
                     foreach ($showem as $res) {
                         $statisticsoutput .= "<tr><td>" . $res[0] . "</td><td>" . $res[1] . "</td></tr>";
@@ -840,15 +854,12 @@ class statistics_helper
             }
         }
 
-        //N = numerical input
-        //K = multiple numerical input
+        //N = Numerical input
+        //K = Multiple numerical input
         elseif ($sQuestionType == "N" || $sQuestionType == "K") {
             //NUMERICAL TYPE
             //Zero handling
-            if (!isset($excludezeros)) {
-                //If this hasn't been set, set it to on as default:
-                $excludezeros = 1;
-            }
+            $excludezeros = 1;
             //check last character, greater/less/equals don't need special treatment
             if (substr($rt, -1) == "G" || substr($rt, -1) == "L" || substr($rt, -1) == "=") {
                 //DO NOTHING
@@ -897,7 +908,7 @@ class statistics_helper
                         break;
                     case 'html':
                         $statisticsoutput .= "\n<table class='statisticstable table table-bordered' >\n"
-                        . "\t<thead><tr  class='success'><th colspan='2' align='right'  class='success'><strong>" . sprintf(gT("Summary for %s"), $qtitle) . ":</strong>"
+                        . "\t<thead><tr><th colspan='2' align='right'><strong>" . sprintf(gT("Summary for %s"), $qtitle) . ":</strong>"
                         . "</th></tr>\n"
                         . "\t<tr><th colspan='2' align='right'><strong>$qquestion</strong></th></tr>\n"
                         . "\t<tr>\n\t\t<th width='50%' align='right' ><strong>"
@@ -905,7 +916,7 @@ class statistics_helper
                         . "\t\t<th width='50%' align='right' ><strong>"
                         . gT("Result") . "</strong></th>\n"
                         . "\t</tr></thead>\n"
-                        ."<tbody>\n";
+                        . "<tbody>\n";
 
                         break;
                     default:
@@ -915,45 +926,18 @@ class statistics_helper
                 //this field is queried using mathematical functions
                 $fieldname = substr($rt, 1, strlen($rt));
 
-                //special treatment for MS SQL databases
-                if ($sDatabaseType == 'mssql' || $sDatabaseType == 'sqlsrv' || $sDatabaseType == 'dblib') {
-                    //standard deviation
-                    $query = "SELECT STDEVP(" . Yii::app()->db->quoteColumnName($fieldname) . "*1) as stdev";
-                }
-
-                //other databases (MySQL, Postgres)
-                else {
-                    //standard deviation
-                    $query = "SELECT STDDEV(CAST(" . Yii::app()->db->quoteColumnName($fieldname) . " AS DECIMAL(26,6))) as stdev";
-                }
-
-                //sum
-                $query .= ", SUM(CAST(" . Yii::app()->db->quoteColumnName($fieldname) . " AS DECIMAL(26,6))) as sum";
-
-                //average
-                $query .= ", AVG(CAST(" . Yii::app()->db->quoteColumnName($fieldname) . " AS DECIMAL(26,6))) as average";
-
-                //min
-                $query .= ", MIN(CAST(" . Yii::app()->db->quoteColumnName($fieldname) . " AS DECIMAL(26,6))) as minimum";
-
-                //max
-                $query .= ", MAX(CAST(" . Yii::app()->db->quoteColumnName($fieldname) . " AS DECIMAL(26,6))) as maximum";
+                $query = "SELECT " . Yii::app()->db->quoteColumnName($fieldname);
                 //Only select responses where there is an actual number response, ignore nulls and empties (if these are included, they are treated as zeroes, and distort the deviation/mean calculations)
-
+                $query .= " FROM {{survey_$surveyid}} WHERE " . Yii::app()->db->quoteColumnName($fieldname) . " IS NOT NULL";
                 //special treatment for MS SQL databases
-                if ($sDatabaseType == 'mssql' || $sDatabaseType == 'sqlsrv' || $sDatabaseType == 'dblib') {
+                if ($sDatabaseType === 'mssql' || $sDatabaseType === 'sqlsrv' || $sDatabaseType === 'dblib') {
                     //no NULL/empty values please
-                    $query .= " FROM {{survey_$surveyid}} WHERE " . Yii::app()->db->quoteColumnName($fieldname) . " IS NOT NULL";
                     if (!$excludezeros) {
                         //NO ZERO VALUES
                         $query .= " AND (" . Yii::app()->db->quoteColumnName($fieldname) . " <> 0)";
                     }
-                }
-
-                //other databases (MySQL, Postgres)
-                else {
+                } else { //other databases (MySQL, Postgres)
                     //no NULL/empty values please
-                    $query .= " FROM {{survey_$surveyid}} WHERE " . Yii::app()->db->quoteColumnName($fieldname) . " IS NOT NULL";
                     if (!$excludezeros) {
                         //NO ZERO VALUES
                         $query .= " AND (" . Yii::app()->db->quoteColumnName($fieldname) . " != 0)";
@@ -961,9 +945,9 @@ class statistics_helper
                 }
 
                 //filter incomplete answers if set
-                if (incompleteAnsFilterState() == "incomplete") {
+                if (incompleteAnsFilterState() === "incomplete") {
                     $query .= " AND submitdate is null";
-                } elseif (incompleteAnsFilterState() == "complete") {
+                } elseif (incompleteAnsFilterState() === "complete") {
                     $query .= " AND submitdate is not null";
                 }
 
@@ -973,27 +957,46 @@ class statistics_helper
                 }
 
                 //execute query
-                $result = Yii::app()->db->createCommand($query)->queryAll();
-
-                //get calculated data
-                foreach ($result as $row) {
-                    //put translation of mean and calculated data into $showem array
-                    $showem[] = array(gT("Sum"), $row['sum']);
-                    $showem[] = array(gT("Standard deviation"), round($row['stdev'], 2));
-                    $showem[] = array(gT("Average"), round($row['average'], 2));
-                    $showem[] = array(gT("Minimum"), $row['minimum']);
-
-                    //Display the maximum and minimum figures after the quartiles for neatness
-                    $maximum = $row['maximum'];
+                $rows = Yii::app()->db->createCommand($query)->queryAll();
+                foreach ($rows as $key => $row) {
+                    if ($fielddata['encrypted'] === "Y") {
+                        $rows[$key] = LSActiveRecord::decryptSingle($row[$fieldname]);
+                    } else {
+                        $rows[$key] = $row[$fieldname];
+                    }
                 }
+
+                //calculate statistical values
+                if (!empty($rows)) {
+                    $standardDeviation = standardDeviation($rows);
+                    $sum = array_sum($rows);
+                    $average = $sum / count($rows);
+                    $min = min($rows);
+                    $max = max($rows);
+                } else {
+                    $standardDeviation = 0;
+                    $sum = 0;
+                    $average = 0;
+                    $min = 0;
+                    $max = 0;
+                }
+
+                //put translation of mean and calculated data into $showem array
+                $showem[] = [gT("Sum"), $sum];
+                $showem[] = [gT("Standard deviation"), round($standardDeviation, 2)];
+                $showem[] = [gT("Average"), round($average, 2)];
+                $showem[] = [gT("Minimum"), $min];
+
+                //Display the maximum and minimum figures after the quartiles for neatness
+                $maximum = $max;
 
 
                 //CALCULATE QUARTILES
-                $medcount = $this->getQuartile(0, $fieldname, $surveyid, $sql, $excludezeros); // Get the recordcount
+                $medcount = $this->getQuartile(0, $fielddata, $sql, $excludezeros); // Get the recordcount
                 $quartiles = array();
-                $quartiles[1] = $this->getQuartile(1, $fieldname, $surveyid, $sql, $excludezeros);
-                $quartiles[2] = $this->getQuartile(2, $fieldname, $surveyid, $sql, $excludezeros);
-                $quartiles[3] = $this->getQuartile(3, $fieldname, $surveyid, $sql, $excludezeros);
+                $quartiles[1] = $this->getQuartile(1, $fielddata, $sql, $excludezeros);
+                $quartiles[2] = $this->getQuartile(2, $fielddata, $sql, $excludezeros);
+                $quartiles[3] = $this->getQuartile(3, $fielddata, $sql, $excludezeros);
 
                 //we just put the total number of records at the beginning of this array
                 array_unshift($showem, array(gT("Count"), $medcount));
@@ -1019,11 +1022,11 @@ class statistics_helper
                         case 'xls':
                             $this->xlsRow++;
                             $this->sheet->write($this->xlsRow, 0, html_entity_decode($shw[0], ENT_QUOTES, 'UTF-8'));
-                            $this->sheet->write($this->xlsRow, 1, html_entity_decode($shw[1], ENT_QUOTES, 'UTF-8'));
+                            $this->sheet->write($this->xlsRow, 1, html_entity_decode((string) $shw[1], ENT_QUOTES, 'UTF-8'));
 
                             break;
                         case 'pdf':
-                            $tablePDF[] = array(html_entity_decode($shw[0], ENT_QUOTES, 'UTF-8'), html_entity_decode($shw[1], ENT_QUOTES, 'UTF-8'));
+                            $tablePDF[] = array(html_entity_decode($shw[0], ENT_QUOTES, 'UTF-8'), html_entity_decode((string) $shw[1], ENT_QUOTES, 'UTF-8'));
 
                             break;
                         case 'html':
@@ -1072,7 +1075,7 @@ class statistics_helper
                         if ($browse) {
                             $statisticsoutput .= "\t<tr>\n"
                             . "\t\t<td align='right'  colspan='4'>
-                            <input type='button' class='statisticsbrowsebutton numericalbrowse btn btn-default btn-large' value='"
+                            <input type='button' class='statisticsbrowsebutton numericalbrowse btn btn-outline-secondary btn-large' value='"
                             . gT("Browse") . "' id='$fieldname' /></td>\n</tr>";
                             $statisticsoutput .= "<tr><td class='statisticsbrowsecolumn' colspan='3' style='display: none'>
                             <div class='statisticsbrowsecolumn' id='columnlist_{$fieldname}'></div></td></tr>";
@@ -1113,8 +1116,6 @@ class statistics_helper
                         default:
                             break;
                     }
-
-                    unset($showem);
                 }
             }    //end else -> check last character, greater/less/equals don't need special treatment
         }    //end else-if -> multiple numerical types
@@ -1160,8 +1161,8 @@ class statistics_helper
 
             //check question types
             switch ($qtype) {
-                //Array of 5 point choices (several items to rank!)
-                case Question::QT_A_ARRAY_5_CHOICE_QUESTIONS:
+                // Array of 5 point choices (several items to rank!)
+                case Question::QT_A_ARRAY_5_POINT:
                     //get data
                     $qresult = Question::model()->findAll(array('condition' => 'parent_qid=:parent_qid AND title=:title', 'params' => array(":parent_qid" => $qiqid, ':title' => $qanswer)));
                     //loop through results
@@ -1178,11 +1179,10 @@ class statistics_helper
                     //list IDs and answer codes in brackets
                     $qquestion .= $linefeed;
                     $qtitle .= "($qanswer)" . "[" . $atext . "]";
+                    $subquestionText = $atext;
                     break;
 
-
-
-                    //Array of 10 point choices
+                    // Array of 10 point choices
                     //same as above just with 10 items
                 case Question::QT_B_ARRAY_10_CHOICE_QUESTIONS:
                     $qresult = Question::model()->findAll(array('condition' => 'parent_qid=:parent_qid AND title=:title', 'params' => array(":parent_qid" => $qiqid, ':title' => $qanswer)));
@@ -1195,11 +1195,12 @@ class statistics_helper
 
                     $qquestion .= $linefeed;
                     $qtitle .= "({$qanswer})" . "[" . $atext . "]";
+                    $subquestionText = $atext;
                     break;
 
 
 
-                    //Array of Yes/No/gT("Uncertain")
+                    // Array of Yes/No/gT("Uncertain")
                 case Question::QT_C_ARRAY_YES_UNCERTAIN_NO:
                     $qresult = Question::model()->findAll(array('condition' => 'parent_qid=:parent_qid AND title=:title', 'params' => array(":parent_qid" => $qiqid, ':title' => $qanswer)));
                     //loop thorugh results
@@ -1213,13 +1214,14 @@ class statistics_helper
                     //output
                     $qquestion .= $linefeed;
                     $qtitle .= "({$qanswer})" . "[" . $atext . "]";
+                    $subquestionText = $atext;
                     break;
 
 
 
-                    //Array of Yes/No/gT("Uncertain")
+                    // Array of Yes/No/gT("Uncertain")
                     //same as above
-                case Question::QT_E_ARRAY_OF_INC_SAME_DEC_QUESTIONS:
+                case Question::QT_E_ARRAY_INC_SAME_DEC:
                     $qresult = Question::model()->findAll(array('condition' => 'parent_qid=:parent_qid AND title=:title', 'params' => array(":parent_qid" => $qiqid, ':title' => $qanswer)));
                     foreach ($qresult as $qrow) {
                         $alist[] = array("I", gT("Increase"));
@@ -1229,11 +1231,12 @@ class statistics_helper
                     }
                     $qquestion .= $linefeed;
                     $qtitle .= "({$qanswer})" . "[" . $atext . "]";
+                    $subquestionText = $atext;
                     break;
 
 
-                case Question::QT_SEMICOLON_ARRAY_MULTI_FLEX_TEXT: //Array (Multi Flexi) (Text)
-                    list($qacode, $licode) = explode("_", $qanswer);
+                case Question::QT_SEMICOLON_ARRAY_TEXT: // Array (Multi Flexi) (Text)
+                    list($qacode, $licode) = explode("_", (string) $qanswer);
 
                     $qresult = Question::model()->findAll(array('condition' => 'parent_qid=:parent_qid AND title=:title', 'params' => array(":parent_qid" => $qiqid, ':title' => $qanswer)));
                     foreach ($qresult as $qrow) {
@@ -1247,26 +1250,38 @@ class statistics_helper
 
                     $qquestion .= $linefeed;
                     $qtitle .= "($qanswer)" . "[" . $atext . "] [" . $ltext . "]";
+                    $subquestionText = $atext;
                     break;
 
-                case Question::QT_COLON_ARRAY_MULTI_FLEX_NUMBERS: //Array (Multiple Flexi) (Numbers)
+                case Question::QT_COLON_ARRAY_NUMBERS: // Array (Multiple Flexi) (Numbers)
                     $aQuestionAttributes = QuestionAttribute::model()->getQuestionAttributes($qiqid);
-                    if (trim($aQuestionAttributes['multiflexible_max']) != '') {
+                    $minvalue = 1;
+                    $maxvalue = 10;
+                    if (trim((string) $aQuestionAttributes['multiflexible_max']) != '' && trim((string) $aQuestionAttributes['multiflexible_min']) == '') {
                         $maxvalue = $aQuestionAttributes['multiflexible_max'];
-                    } else {
-                        $maxvalue = 10;
-                    }
-
-                    if (trim($aQuestionAttributes['multiflexible_min']) != '') {
-                        $minvalue = $aQuestionAttributes['multiflexible_min'];
-                    } else {
                         $minvalue = 1;
                     }
+                    if (trim((string) $aQuestionAttributes['multiflexible_min']) != '' && trim((string) $aQuestionAttributes['multiflexible_max']) == '') {
+                        $minvalue = $aQuestionAttributes['multiflexible_min'];
+                        $maxvalue = $aQuestionAttributes['multiflexible_min'] + 10;
+                    }
+                    if (trim((string) $aQuestionAttributes['multiflexible_min']) != '' && trim((string) $aQuestionAttributes['multiflexible_max']) != '') {
+                        if ($aQuestionAttributes['multiflexible_min'] < $aQuestionAttributes['multiflexible_max']) {
+                            $minvalue = $aQuestionAttributes['multiflexible_min'];
+                            $maxvalue = $aQuestionAttributes['multiflexible_max'];
+                        }
+                    }
 
-                    if (trim($aQuestionAttributes['multiflexible_step']) != '') {
-                        $stepvalue = $aQuestionAttributes['multiflexible_step'];
+                    $stepvalue = (trim((string) $aQuestionAttributes['multiflexible_step']) != '' && $aQuestionAttributes['multiflexible_step'] > 0) ? $aQuestionAttributes['multiflexible_step'] : 1;
+
+                    if ($aQuestionAttributes['reverse'] == 1) {
+                        $tmp = $minvalue;
+                        $minvalue = $maxvalue;
+                        $maxvalue = $tmp;
+                        $reverse = true;
+                        $stepvalue = -$stepvalue;
                     } else {
-                        $stepvalue = 1;
+                        $reverse = false;
                     }
 
                     if ($aQuestionAttributes['multiflexible_checkbox'] != 0) {
@@ -1280,12 +1295,12 @@ class statistics_helper
                     }
 
                     $qquestion .= $linefeed . "[" . $fielddata['subquestion1'] . "] [" . $fielddata['subquestion2'] . "]";
-                    list($myans, $mylabel) = explode("_", $qanswer);
+                    list($myans, $mylabel) = explode("_", (string) $qanswer);
                     $qtitle .= "[$myans][$mylabel]";
                     break;
 
-                case Question::QT_F_ARRAY_FLEXIBLE_ROW: //Array of Flexible
-                case Question::QT_H_ARRAY_FLEXIBLE_COLUMN: //Array of Flexible by Column
+                case Question::QT_F_ARRAY: // Array of Flexible
+                case Question::QT_H_ARRAY_COLUMN: // Array of Flexible by Column
                     $qresult = Question::model()->findAll(array('order' => 'question_order', 'condition' => 'parent_qid=:parent_qid AND title=:title', 'params' => array(":parent_qid" => $qiqid, ':title' => $qanswer)));
                     //loop through answers
                     foreach ($qresult as $qrow) {
@@ -1303,11 +1318,12 @@ class statistics_helper
                     //output
                     $qquestion .= $linefeed;
                     $qtitle .= "($qanswer)" . "[" . $atext . "]";
+                    $subquestionText = $atext;
                     break;
 
 
 
-                case Question::QT_G_GENDER_DROPDOWN: //Gender
+                case Question::QT_G_GENDER: //Gender
                     $alist[] = array("F", gT("Female"));
                     $alist[] = array("M", gT("Male"));
                     break;
@@ -1335,8 +1351,10 @@ class statistics_helper
                     break;
 
 
-                case Question::QT_1_ARRAY_MULTISCALE:
-                    $sSubquestionQuery = "SELECT  question FROM {{questions}} q JOIN {{question_l10ns}} l ON q.qid = l.qid  WHERE q.parent_qid='$qiqid' AND q.title='$qanswer' AND l.language='{$language}' ORDER BY q.question_order";
+                case Question::QT_1_ARRAY_DUAL:
+                    $qiqid = (int) $qiqid;
+                    $qanswerquoted = Yii::app()->db->quoteValue($qanswer);
+                    $sSubquestionQuery = "SELECT  question FROM {{questions}} q JOIN {{question_l10ns}} l ON q.qid = l.qid  WHERE q.parent_qid='$qiqid' AND q.title=$qanswerquoted AND l.language='{$language}' ORDER BY q.question_order";
 
                     $questionDesc = Yii::app()->db->createCommand($sSubquestionQuery)->query()->read();
                     $sSubquestion = flattenText($questionDesc['question']);
@@ -1351,7 +1369,7 @@ class statistics_helper
                         $fquery = "SELECT * FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid  WHERE a.qid='{$qqid}' AND a.scale_id=0 AND l.language='{$language}' ORDER BY a.sortorder, a.code";
 
                         //header available?
-                        if (trim($aQuestionAttributes['dualscale_headerA'][$language]) != '') {
+                        if (trim((string) $aQuestionAttributes['dualscale_headerA'][$language]) != '') {
                             //output
                             $labelheader = "[" . $aQuestionAttributes['dualscale_headerA'][$language] . "]";
                         }
@@ -1371,7 +1389,7 @@ class statistics_helper
                         $fquery = "SELECT * FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid  WHERE a.qid='{$qqid}' AND a.scale_id=1 AND l.language='{$language}' ORDER BY a.sortorder, a.code";
 
                         //header available?
-                        if (trim($aQuestionAttributes['dualscale_headerB'][$language]) != '') {
+                        if (trim((string) $aQuestionAttributes['dualscale_headerB'][$language]) != '') {
                             //output
                             $labelheader = "[" . $aQuestionAttributes['dualscale_headerB'][$language] . "]";
                         }
@@ -1396,6 +1414,7 @@ class statistics_helper
                     //adapt title and question
                     $qtitle = $qtitle . " [" . $sSubquestion . "][" . $labelno . "]";
                     $qquestion = $qastring . $labelheader;
+                    $subquestionText = $sSubquestion;
                     break;
 
 
@@ -1410,7 +1429,7 @@ class statistics_helper
                     }
 
                     //handling for "other" field for list radio or list drowpdown
-                    if ((($qtype == Question::QT_L_LIST_DROPDOWN || $qtype == Question::QT_EXCLAMATION_LIST_DROPDOWN) && $qother == Question::QT_Y_YES_NO_RADIO)) {
+                    if ((($qtype == Question::QT_L_LIST || $qtype == Question::QT_EXCLAMATION_LIST_DROPDOWN) && $qother == Question::QT_Y_YES_NO_RADIO)) {
                         //add "other"
                         $alist[] = array(gT("Other"), gT("Other"), $fielddata['fieldname'] . 'other');
                     }
@@ -1425,7 +1444,15 @@ class statistics_helper
             $alist[] = array("", gT("No answer"), false, 'is_no_answer');
         }
 
-        return array("alist" => $alist, "qtitle" => $qtitle, "qquestion" => $qquestion, "qtype" => $qtype, "statisticsoutput" => $statisticsoutput, "parentqid" => (int)$qqid);
+        return [
+            "alist" => $alist,
+            "qtitle" => $qtitle,
+            "qquestion" => $qquestion,
+            "qtype" => $qtype,
+            "statisticsoutput" => $statisticsoutput,
+            "parentqid" => (int)$qqid,
+            "subquestionText" => $subquestionText,
+        ];
     }
 
     /**
@@ -1433,6 +1460,7 @@ class statistics_helper
      * @param integer $usegraph
      * @param boolean $browse
      * @return array
+     * @psalm-suppress UndefinedVariable
      */
     protected function displaySimpleResults($outputs, $results, $rt, $outputType, $surveyid, $sql, $usegraph, $browse, $sLanguage)
     {
@@ -1444,96 +1472,56 @@ class statistics_helper
 
         //loop though the array which contains all answer data
         $ColumnName_RM = array();
-        //check filter option
-        $criteria = new CDbCriteria();
-        if (incompleteAnsFilterState() == "incomplete") {
-            $criteria->addCondition("submitdate is null");
-        } elseif (incompleteAnsFilterState() == "complete") {
-            $criteria->addCondition("submitdate is not null");
-        }
-        // prepare and decrypt data
-        $oResponses = Response::model($surveyid)->findAll($criteria);
-        foreach ($oResponses as $key => $oResponse) {
-            $oResponses[$key] = $oResponse->decrypt();
-        }
+
+        $responseModel = SurveyDynamic::model($surveyid);
 
         foreach ($outputs['alist'] as $al) {
-            $row = 0;
+
             if (isset($al[2]) && $al[2]) {
                 //handling for "other" option
                 if ($al[0] == gT("Other")) {
-                    if ($outputs['qtype'] == Question::QT_EXCLAMATION_LIST_DROPDOWN || $outputs['qtype'] == Question::QT_L_LIST_DROPDOWN) {
-                        // It is better for single choice question types to filter on the number of '-oth-' entries, than to
-                        // just count the number of 'other' values - that way with failing Javascript the statistics don't get messed up
-                        /* This query selects a count of responses where "other" has been selected */
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            $column = substr($sResponseColumn, 0, strlen($sResponseColumn) - 5);
-                            if ($column == '-oth-' && !empty($oResponse->$sResponseColumn)) {
-                                $row += 1;
-                            }
-                        }
+                    if ($outputs['qtype'] == Question::QT_EXCLAMATION_LIST_DROPDOWN || $outputs['qtype'] == Question::QT_L_LIST) {
+                        $columnName = substr((string) $al[2], 0, strlen((string) $al[2]) - 5);
+                        $othEncrypted = getEncryptedCondition($responseModel, $columnName, '-oth-');
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ".Yii::app()->db->quoteColumnName($columnName)."='$othEncrypted'";
                     } else {
-                        //get data - select a count of responses where no answer is provided
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            if ($oResponse->$sResponseColumn != '') {
-                                $row += 1;
-                            }
-                        }
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ";
+                        $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." != ''" : "NOT (".Yii::app()->db->quoteColumnName($al[2])." LIKE '')";
                     }
                 }
 
                 /*
                 * text questions:
                 *
-                * U = huge free text
+                * U = Huge free text
                 * T = long free text
-                * S = short free text
-                * Q = multiple short text
+                * S = Short free text
+                * Q = Multiple short text
                 */
-                elseif ($outputs['qtype'] == Question::QT_U_HUGE_FREE_TEXT || $outputs['qtype'] == Question::QT_T_LONG_FREE_TEXT || $outputs['qtype'] == Question::QT_S_SHORT_FREE_TEXT || $outputs['qtype'] == Question::QT_Q_MULTIPLE_SHORT_TEXT || $outputs['qtype'] == Question::QT_SEMICOLON_ARRAY_MULTI_FLEX_TEXT) {
+                elseif ($outputs['qtype'] == Question::QT_U_HUGE_FREE_TEXT || $outputs['qtype'] == Question::QT_T_LONG_FREE_TEXT || $outputs['qtype'] == Question::QT_S_SHORT_FREE_TEXT || $outputs['qtype'] == Question::QT_Q_MULTIPLE_SHORT_TEXT || $outputs['qtype'] == Question::QT_SEMICOLON_ARRAY_TEXT) {
                     $sDatabaseType = Yii::app()->db->getDriverName();
 
                     //free text answers
                     if ($al[0] == "Answer") {
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            if ($oResponse->$sResponseColumn != '') {
-                                $row += 1;
-                            }
-                        }
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ";
+                        $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." != ''" : "NOT (".Yii::app()->db->quoteColumnName($al[2])." LIKE '')";
                     }
                     //"no answer" handling
                     elseif ($al[0] == "NoAnswer") {
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            if ($oResponse->$sResponseColumn === '') {
-                                $row += 1;
-                            }
-                        }
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( ";
+                        $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." = '')" : " (".Yii::app()->db->quoteColumnName($al[2])." LIKE ''))";
                     }
                 } elseif ($outputs['qtype'] == Question::QT_O_LIST_WITH_COMMENT) {
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $al[2];
-                        if ($oResponse->$sResponseColumn != '') {
-                            $row += 1;
-                        }
-                    }
+                    $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( ";
+                    $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." <> '')" : " (".Yii::app()->db->quoteColumnName($al[2])." NOT LIKE ''))";
                 // all other question types
                 } else {
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $al[2];
-                        if (substr($rt, 0, 1) == "R") {
-                            $sSubquestionCode = $al[0];
-                            if ($oResponse->$sResponseColumn == $sSubquestionCode) {
-                                $row += 1;
-                            }
-                        } else {
-                            if ($oResponse->$sResponseColumn == 'Y') {
-                                $row += 1;
-                            }
-                        }
+                    $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ".Yii::app()->db->quoteColumnName($al[2])." =";
+                    //ranking question?
+                    if (substr((string) $rt, 0, 1) == "R") {
+                        $query .= " '$al[0]'";
+                    } else {
+                        $query .= " 'Y'";
                     }
                 }
             }    //end if -> alist set
@@ -1541,12 +1529,12 @@ class statistics_helper
             else {
                 if ($al[0] != "") {
                     //get more data
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $rt;
-                        $sSubquestionCode = $al[0];
-                        if ($oResponse->$sResponseColumn == $sSubquestionCode) {
-                            $row += 1;
-                        }
+                    $sDatabaseType = Yii::app()->db->getDriverName();
+                    if ($sDatabaseType == 'mssql' || $sDatabaseType == 'sqlsrv' || $sDatabaseType == 'dblib') {
+                        // mssql cannot compare text blobs so we have to cast here
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE cast(".Yii::app()->db->quoteColumnName($rt)." as varchar)= '$al[0]'";
+                    } else {
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ".Yii::app()->db->quoteColumnName($rt)." = '$al[0]'";
                     }
                 } else {
                     // This is for the 'NoAnswer' case
@@ -1557,19 +1545,27 @@ class statistics_helper
                     //  ==> value is ''
                     // * NoAnswer due to conditions, or a page not displayed
                     //  ==> value is NULL
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $rt;
-                        if ($oResponse->$sResponseColumn === '' || $oResponse->$sResponseColumn == ' ') {
-                            $row += 1;
-                        }
+                    if ($sDatabaseType == 'mssql' || $sDatabaseType == 'sqlsrv' || $sDatabaseType == 'dblib') {
+                        // mssql cannot compare text blobs so we have to cast here
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( "
+                            . "cast(".Yii::app()->db->quoteColumnName($rt)." as varchar) = '' "
+                            . "OR cast(".Yii::app()->db->quoteColumnName($rt)." as varchar) = ' ' )";
+                    } else {
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( "
+                            . " ".Yii::app()->db->quoteColumnName($rt)." = '' "
+                            . "OR ".Yii::app()->db->quoteColumnName($rt)." = ' ') ";
                     }
                 }
             }
+
+            if (incompleteAnsFilterState() == "incomplete") {$query .= " AND submitdate is null"; } elseif (incompleteAnsFilterState() == "complete") {$query .= " AND submitdate is not null"; }
 
             //check for any "sql" that has been passed from another script
             if (!empty($sql)) {
                 $query .= " AND $sql";
             }
+
+            $row = (int) Yii::app()->db->createCommand($query)->queryScalar();
 
             //store temporarily value of answer count of question type '5' and 'A'.
             $tempcount = -1; //count can't be less han zero
@@ -1596,7 +1592,7 @@ class statistics_helper
                 }
                 $fname = "$al[1]";
                 if ($browse === true) {
-                    $fname .= " <input type='button' class='statisticsbrowsebutton btn btn-default btn-large' value='"
+                    $fname .= " <input type='button' class='statisticsbrowsebutton btn btn-outline-secondary btn-large' value='"
                     . gT("Browse") . "' id='$sColumnName' />";
                 }
             }
@@ -1604,10 +1600,10 @@ class statistics_helper
             /*
             * text questions:
             *
-            * U = huge free text
+            * U = Huge free text
             * T = long free text
-            * S = short free text
-            * Q = multiple short text
+            * S = Short free text
+            * Q = Multiple short text
             */
             elseif ($outputs['qtype'] == Question::QT_S_SHORT_FREE_TEXT || $outputs['qtype'] == Question::QT_U_HUGE_FREE_TEXT || $outputs['qtype'] == Question::QT_T_LONG_FREE_TEXT || $outputs['qtype'] == Question::QT_Q_MULTIPLE_SHORT_TEXT) {
                 $headPDF = array();
@@ -1617,7 +1613,7 @@ class statistics_helper
                 if ($al[0] == "Answer") {
                     $fname = "$al[1]";
                     if ($browse === true) {
-                        $fname .= " <input type='button'  class='statisticsbrowsebutton btn btn-default btn-large' value='"
+                        $fname .= " <input type='button'  class='statisticsbrowsebutton btn btn-outline-secondary btn-large' value='"
                         . gT("Browse") . "' id='$sColumnName' />";
                     }
                 } elseif ($al[0] == "NoAnswer") {
@@ -1782,9 +1778,9 @@ class statistics_helper
         //we need to know which item we are editing
         $itemcounter = 1;
 
-        $aData['outputs'] = (isset($outputs)) ? $outputs : '';
-        $aData['bSum'] = (isset($bSum)) ? $bSum : '';
-        $aData['bAnswer'] = (isset($bAnswer)) ? $bAnswer : '';
+        $aData['outputs'] = $outputs ?? '';
+        $aData['bSum'] = $bSum ?? '';
+        $aData['bAnswer'] = $bAnswer ?? '';
         $aData['usegraph'] = $usegraph;
 
         $statisticsoutput = Yii::app()->getController()->renderPartial('/admin/export/generatestats/simplestats/_statisticsoutput_header', $aData, true);
@@ -1799,7 +1795,7 @@ class statistics_helper
 
 
             /*
-            * there are 3 colums:
+            * there are 3 columns:
             *
             * 1 (50%) = answer (title and code in brackets)
             * 2 (25%) = count (absolute)
@@ -1823,7 +1819,7 @@ class statistics_helper
             //data available
             if (($gdata[$i] !== "N/A")) {
                 //check if data should be aggregated
-                if (Yii::app()->getConfig('showaggregateddata') == 1 && ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_CHOICE_QUESTIONS)) {
+                if (Yii::app()->getConfig('showaggregateddata') == 1 && ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_POINT)) {
                     //mark that we have done soemthing special here
                     $aggregated = true;
 
@@ -1903,13 +1899,13 @@ class statistics_helper
             $aData['label'] = $label;
             $aData['grawdata'] = $grawdata;
             $aData['gdata'] = $gdata;
-            $aData['extraline'] = (isset($extraline)) ? $extraline : false;
-            $aData['aggregated'] = (isset($aggregated)) ? $aggregated : false;
-            $aData['aggregatedPercentage'] = (isset($aggregatedPercentage)) ? $aggregatedPercentage : false;
-            $aData['sumitems'] = (isset($sumitems)) ? $sumitems : false;
-            $aData['sumpercentage'] = (isset($sumpercentage)) ? $sumpercentage : false;
-            $aData['TotalCompleted'] = (isset($TotalCompleted)) ? $TotalCompleted : false;
-            $aData['casepercentage'] = (isset($casepercentage)) ? $casepercentage : false;
+            $aData['extraline'] = $extraline ?? false;
+            $aData['aggregated'] = $aggregated ?? false;
+            $aData['aggregatedPercentage'] = $aggregatedPercentage ?? false;
+            $aData['sumitems'] = $sumitems ?? false;
+            $aData['sumpercentage'] = $sumpercentage ?? false;
+            $aData['TotalCompleted'] = $TotalCompleted ?? false;
+            $aData['casepercentage'] = $casepercentage ?? false;
 
             // Generate answer
             // _statisticsoutput_answer
@@ -1923,7 +1919,7 @@ class statistics_helper
             //it's only useful to calculate standard deviation and arithmetic means for question types
             //5 = 5 Point Scale
             //A = Array (5 Point Choice)
-            if ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_CHOICE_QUESTIONS) {
+            if ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_POINT) {
                 $stddev = 0;
                 $stddevarray = array_slice($grawdata, 0, 5, true);
                 $am = 0;
@@ -2003,8 +1999,9 @@ class statistics_helper
 
 
         //-------------------------- PCHART OUTPUT ----------------------------
-        list(, $qgid, $qqid) = explode("X", $rt, 3);
-        $aattr = QuestionAttribute::model()->getQuestionAttributes($outputs['parentqid']);
+        list(, $qgid, $qqid) = explode("X", (string) $rt, 3);
+        $attrQid = $outputs['parentqid'] > 0 ? $outputs['parentqid'] : $qqid; // use parentqid if exists
+        $aattr = QuestionAttribute::model()->getQuestionAttributes($attrQid);
 
         //PCHART has to be enabled and we need some data
         //
@@ -2099,7 +2096,7 @@ class statistics_helper
         //close table/output
         if ($outputType == 'html') {
             // show this block only when we show graphs and are not in the public statics controller
-            if ($usegraph == 1 && $bShowGraph && get_class(Yii::app()->getController()) !== 'Statistics_userController') {
+            if ($usegraph == 1 && $bShowGraph && get_class(Yii::app()->getController()) !== 'StatisticsUserController') {
                 $fullLabels = $labels;
                 // We clean the labels
                 $iMaxLabelLength = 0;
@@ -2143,8 +2140,7 @@ class statistics_helper
      * @param mixed $surveyid
      * @param mixed $sql
      * @param integer $usegraph
-     *
-     *
+     * @psalm-suppress UndefinedVariable
      */
     protected function displayResults($outputs, $results, $rt, $outputType, $surveyid, $sql, $usegraph, $browse, $sLanguage)
     {
@@ -2161,16 +2157,16 @@ class statistics_helper
 
         if ($usegraph == 1 && $outputType != 'html') {
             //for creating graphs we need some more scripts which are included here
-            require_once(APPPATH . '/third_party/pchart/pChart.class.php');
-            require_once(APPPATH . '/third_party/pchart/pData.class.php');
-            require_once(APPPATH . '/third_party/pchart/pCache.class.php');
+            require_once(APPPATH . '/../vendor/pchart/pChart.class.php');
+            require_once(APPPATH . '/../vendor/pchart/pData.class.php');
+            require_once(APPPATH . '/../vendor/pchart/pCache.class.php');
             $MyCache = new pCache($tempdir . '/');
         }
 
         switch ($outputType) {
             case 'xls':
-                $xlsTitle = sprintf(gT("Summary for %s"), html_entity_decode($outputs['qtitle'], ENT_QUOTES, 'UTF-8'));
-                $xlsDesc = html_entity_decode($outputs['qquestion'], ENT_QUOTES, 'UTF-8');
+                $xlsTitle = sprintf(gT("Summary for %s"), html_entity_decode((string) $outputs['qtitle'], ENT_QUOTES, 'UTF-8'));
+                $xlsDesc = html_entity_decode((string) $outputs['qquestion'], ENT_QUOTES, 'UTF-8');
 
                 $this->xlsRow++;
                 $this->xlsRow++;
@@ -2184,7 +2180,7 @@ class statistics_helper
                 break;
             case 'pdf':
                 $sPDFQuestion = flattenText($outputs['qquestion'], false, true);
-                $pdfTitle = $this->pdf->delete_html(sprintf(gT("Summary for %s"), html_entity_decode($outputs['qtitle'], ENT_QUOTES, 'UTF-8')));
+                $pdfTitle = $this->pdf->delete_html(sprintf(gT("Summary for %s"), html_entity_decode((string) $outputs['qtitle'], ENT_QUOTES, 'UTF-8')));
                 $titleDesc = $sPDFQuestion;
 
                 $this->pdf->AddPage('P', 'A4');
@@ -2208,116 +2204,69 @@ class statistics_helper
         $tableXLS  = array();
         $tablePDF2 = array();
 
-        //check filter option
-        $criteria = new CDbCriteria();
-        if (incompleteAnsFilterState() == "incomplete") {
-            $criteria->addCondition("submitdate is null");
-        } elseif (incompleteAnsFilterState() == "complete") {
-            $criteria->addCondition("submitdate is not null");
-        }
-
-        //check for any "sql" that has been passed from another script
-        if (!empty($sql)) {
-            $criteria->addCondition($sql);
-        }
-
-        // prepare and decrypt data
-        $oResponses = Response::model($surveyid)->findAll($criteria);
-        foreach ($oResponses as $key => $oResponse) {
-            $oResponses[$key] = $oResponse->decrypt();
-        }
+        $responseModel = SurveyDynamic::model($surveyid);
 
         foreach ($outputs['alist'] as $al) {
-            $row = 0;
             //picks out answer list ($outputs['alist']/$al)) that come from the multiple list above
             if (isset($al[2]) && $al[2]) {
                 //handling for "other" option
                 if ($al[0] == gT("Other")) {
-                    if ($outputs['qtype'] == Question::QT_EXCLAMATION_LIST_DROPDOWN || $outputs['qtype'] == Question::QT_L_LIST_DROPDOWN) {
+                    if ($outputs['qtype'] == Question::QT_EXCLAMATION_LIST_DROPDOWN || $outputs['qtype'] == Question::QT_L_LIST) {
                         // It is better for single choice question types to filter on the number of '-oth-' entries, than to
                         // just count the number of 'other' values - that way with failing Javascript the statistics don't get messed up
                         /* This query selects a count of responses where "other" has been selected */
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            $column = substr($sResponseColumn, 0, strlen($sResponseColumn) - 5);
-                            if ($column == '-oth-' && !empty($oResponse->$sResponseColumn)) {
-                                $row += 1;
-                            }
-                        }
+                        $columnName = substr((string) $al[2], 0, strlen((string) $al[2]) - 5);
+                        $othEncrypted = getEncryptedCondition($responseModel, $columnName, '-oth-');
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ".Yii::app()->db->quoteColumnName($columnName)."='{$othEncrypted}'";
                     } else {
                         //get data - select a count of responses where no answer is provided
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            if ($oResponse->$sResponseColumn != '') {
-                                $row += 1;
-                            }
-                        }
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ";
+                        $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." != ''" : "NOT (".Yii::app()->db->quoteColumnName($al[2])." LIKE '')";
                     }
                 }
 
                 /*
                 * text questions:
                 *
-                * U = huge free text
+                * U = Huge free text
                 * T = long free text
-                * S = short free text
-                * Q = multiple short text
+                * S = Short free text
+                * Q = Multiple short text
                 */
-                elseif ($outputs['qtype'] == Question::QT_U_HUGE_FREE_TEXT || $outputs['qtype'] == Question::QT_T_LONG_FREE_TEXT || $outputs['qtype'] == Question::QT_S_SHORT_FREE_TEXT || $outputs['qtype'] == Question::QT_Q_MULTIPLE_SHORT_TEXT || $outputs['qtype'] == Question::QT_SEMICOLON_ARRAY_MULTI_FLEX_TEXT) {
+                elseif ($outputs['qtype'] == Question::QT_U_HUGE_FREE_TEXT || $outputs['qtype'] == Question::QT_T_LONG_FREE_TEXT || $outputs['qtype'] == Question::QT_S_SHORT_FREE_TEXT || $outputs['qtype'] == Question::QT_Q_MULTIPLE_SHORT_TEXT || $outputs['qtype'] == Question::QT_SEMICOLON_ARRAY_TEXT) {
                     $sDatabaseType = Yii::app()->db->getDriverName();
 
                     //free text answers
                     if ($al[0] == "Answer") {
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            if ($oResponse->$sResponseColumn != '') {
-                                $row += 1;
-                            }
-                        }
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ";
+                        $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." != ''" : "NOT (".Yii::app()->db->quoteColumnName($al[2])." LIKE '')";
                     }
                     //"no answer" handling
                     elseif ($al[0] == "NoAnswer") {
-                        foreach ($oResponses as $oResponse) {
-                            $sResponseColumn = $al[2];
-                            if ($oResponse->$sResponseColumn === '') {
-                                $row += 1;
-                            }
-                        }
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( ";
+                        $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." = '')" : " (".Yii::app()->db->quoteColumnName($al[2])." LIKE ''))";
                     }
                 } elseif ($outputs['qtype'] == Question::QT_O_LIST_WITH_COMMENT) {
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $al[2];
-                        if ($oResponse->$sResponseColumn != '') {
-                            $row += 1;
-                        }
-                    }
+                    $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( ";
+                    $query .= ($sDatabaseType == "mysql") ?  Yii::app()->db->quoteColumnName($al[2])." <> '')" : " (".Yii::app()->db->quoteColumnName($al[2])." NOT LIKE ''))";
                 // all other question types
                 } else {
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $al[2];
-                        if (substr($rt, 0, 1) == "R") {
-                            $sSubquestionCode = $al[0];
-                            if ($oResponse->$sResponseColumn == $sSubquestionCode) {
-                                $row += 1;
-                            }
-                        } else {
-                            if ($oResponse->$sResponseColumn == 'Y') {
-                                $row += 1;
-                            }
-                        }
-                    }
+                    $value = (substr((string) $rt, 0, 1) == "R") ? $al[0] : 'Y';
+                    $encryptedValue = getEncryptedCondition($responseModel, $al[2], $value);
+                    $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ".Yii::app()->db->quoteColumnName($al[2])." = '$encryptedValue'";
                 }
             }    //end if -> alist set
 
             else {
                 if ($al[0] != "") {
                     //get more data
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $rt;
-                        $sSubquestionCode = $al[0];
-                        if ($oResponse->$sResponseColumn == $sSubquestionCode) {
-                            $row += 1;
-                        }
+                    $sDatabaseType = Yii::app()->db->getDriverName();
+                    $encryptedValue = getEncryptedCondition($responseModel, $rt, $al[0]);
+                    if ($sDatabaseType == 'mssql' || $sDatabaseType == 'sqlsrv' || $sDatabaseType == 'dblib') {
+                        // mssql cannot compare text blobs so we have to cast here
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE cast(".Yii::app()->db->quoteColumnName($rt)." as varchar)= '$encryptedValue'";
+                    } else {
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ".Yii::app()->db->quoteColumnName($rt)." = '$encryptedValue'";
                     }
                 } else {
                     // This is for the 'NoAnswer' case
@@ -2328,13 +2277,39 @@ class statistics_helper
                     //  ==> value is ''
                     // * NoAnswer due to conditions, or a page not displayed
                     //  ==> value is NULL
-                    foreach ($oResponses as $oResponse) {
-                        $sResponseColumn = $rt;
-                        if ($oResponse->$sResponseColumn === '' || $oResponse->$sResponseColumn == ' ') {
-                            $row += 1;
-                        }
+                    if ($sDatabaseType == 'mssql' || $sDatabaseType == 'sqlsrv' || $sDatabaseType == 'dblib') {
+                        // mssql cannot compare text blobs so we have to cast here
+                        //$query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE (".sanitize_int($rt)." IS NULL "
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( "
+                        //                                    . "OR cast(".sanitize_int($rt)." as varchar) = '' "
+                        . "cast(".Yii::app()->db->quoteColumnName($rt)." as varchar) = '' "
+                        . "OR cast(".Yii::app()->db->quoteColumnName($rt)." as varchar) = ' ' )";
+                    } elseif ($sDatabaseType == 'pgsql') {
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( "
+                        //                                    . "OR ".sanitize_int($rt)." = '' "
+                        . " ".Yii::app()->db->quoteColumnName($rt)."::text = '' "
+                        . "OR ".Yii::app()->db->quoteColumnName($rt)."::text = ' ') ";
+                    } else {
+                        $query = "SELECT count(*) FROM {{survey_$surveyid}} WHERE ( "
+                        //                                    . "OR ".sanitize_int($rt)." = '' "
+                        . " ".Yii::app()->db->quoteColumnName($rt)." = '' "
+                        . "OR ".Yii::app()->db->quoteColumnName($rt)." = ' ') ";
                     }
                 }
+            }
+
+            //check filter option
+            if (incompleteAnsFilterState() == "incomplete") {$query .= " AND submitdate is null"; } elseif (incompleteAnsFilterState() == "complete") {$query .= " AND submitdate is not null"; }
+
+            //check for any "sql" that has been passed from another script
+            if (!empty($sql)) {$query .= " AND $sql"; }
+
+            //get data
+            try {
+                $row = Yii::app()->db->createCommand($query)->queryScalar();
+            } catch (Exception $ex) {
+                $row = 0;
+                Yii::app()->setFlashMessage('Faulty query: '.htmlspecialchars($query), 'error');
             }
 
             //store temporarily value of answer count of question type '5' and 'A'.
@@ -2362,7 +2337,7 @@ class statistics_helper
                 }
                 $fname = "$al[1]";
                 if ($browse === true) {
-                    $fname .= " <input type='button' class='statisticsbrowsebutton btn btn-default btn-large' value='"
+                    $fname .= " <input type='button' class='statisticsbrowsebutton btn btn-outline-secondary btn-large' value='"
                     . gT("Browse") . "' id='$sColumnName' />";
                 }
 
@@ -2391,10 +2366,10 @@ class statistics_helper
             /*
             * text questions:
             *
-            * U = huge free text
+            * U = Huge free text
             * T = long free text
-            * S = short free text
-            * Q = multiple short text
+            * S = Short free text
+            * Q = Multiple short text
             */
             elseif ($outputs['qtype'] == Question::QT_S_SHORT_FREE_TEXT || $outputs['qtype'] == Question::QT_U_HUGE_FREE_TEXT || $outputs['qtype'] == Question::QT_T_LONG_FREE_TEXT || $outputs['qtype'] == Question::QT_Q_MULTIPLE_SHORT_TEXT) {
                 $headPDF = array();
@@ -2404,7 +2379,7 @@ class statistics_helper
                 if ($al[0] == "Answer") {
                     $fname = "$al[1]";
                     if ($browse === true) {
-                        $fname .= " <input type='button'  class='statisticsbrowsebutton btn btn-default btn-large' value='"
+                        $fname .= " <input type='button'  class='statisticsbrowsebutton btn btn-outline-secondary btn-large' value='"
                         . gT("Browse") . "' id='$sColumnName' />";
                     }
                 } elseif ($al[0] == "NoAnswer") {
@@ -2432,7 +2407,7 @@ class statistics_helper
             //check if aggregated results should be shown
             elseif (Yii::app()->getConfig('showaggregateddata') == 1) {
                 if (!isset($showheadline) || $showheadline != false) {
-                    if ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_CHOICE_QUESTIONS) {
+                    if ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_POINT) {
                         switch ($outputType) {
                             case 'xls':
                                 $this->xlsRow++;
@@ -2622,7 +2597,7 @@ class statistics_helper
                         //we want to have some "real" data here
                         if ($gdata[$i] != "N/A") {
                             //calculate percentage
-                            $gdata[$i] = ($grawdata[$i] / $TotalCompleted) * 100;
+                            $gdata[$i] = $TotalCompleted !== 0 ? ($grawdata[$i] / $TotalCompleted) * 100 : 0;
                         }
                     }
 
@@ -2770,11 +2745,11 @@ class statistics_helper
         $aData['nbcols']          = $nbcols;
         $aData['canvaWidth']      = $canvaWidth;
         $aData['canvaHeight']     = $canvaHeight;
-        $aData['outputs']         = (isset($outputs)) ? $outputs : '';
-        $aData['bSum']            = (isset($bSum)) ? $bSum : false;
-        $aData['bAnswer']         = (isset($bAnswer)) ? $bAnswer : false;
-        $aData['bShowCount']      = (isset($bShowCount)) ? $bShowCount : false;
-        $aData['bShowPercentage'] = (isset($bShowPercentage)) ? $bShowPercentage : false;
+        $aData['outputs']         = $outputs ?? '';
+        $aData['bSum']            = $bSum ?? false;
+        $aData['bAnswer']         = $bAnswer ?? false;
+        $aData['bShowCount']      = $bShowCount ?? false;
+        $aData['bShowPercentage'] = $bShowPercentage ?? false;
         $statisticsoutput         = Yii::app()->getController()->renderPartial('/admin/export/generatestats/_statisticsoutput_header', $aData, true);
         //loop through all available answers
         ////
@@ -2787,7 +2762,7 @@ class statistics_helper
 
 
             /*
-            * there are 3 colums:
+            * there are 3 columns:
             *
             * 1 (50%) = answer (title and code in brackets)
             * 2 (25%) = count (absolute)
@@ -2839,7 +2814,7 @@ class statistics_helper
             //data available
             else {
                 //check if data should be aggregated
-                if (Yii::app()->getConfig('showaggregateddata') == 1 && ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_CHOICE_QUESTIONS)) {
+                if (Yii::app()->getConfig('showaggregateddata') == 1 && ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_POINT)) {
                     //mark that we have done soemthing special here
                     $aggregated = true;
 
@@ -3031,19 +3006,19 @@ class statistics_helper
             $aData['grawdata_percent']     = $grawdata_percents;
             $aData['gdata']                = $gdata;
 
-            $aData['extraline']            = (isset($extraline)) ? $extraline : false;
-            $aData['aggregated']           = (isset($aggregated)) ? $aggregated : false;
+            $aData['extraline']            = $extraline ?? false;
+            $aData['aggregated']           = $aggregated ?? false;
             $aData['aggregatedPercentage'] = (isset($aggregatedPercentage)) ? ($i < 6 ? $aggregatedPercentage : false) : false;
-            $aData['sumitems']             = (isset($sumitems)) ? $sumitems : false;
-            $aData['sumpercentage']        = (isset($sumpercentage)) ? $sumpercentage : false;
-            $aData['TotalCompleted']       = (isset($TotalCompleted)) ? $TotalCompleted : false;
-            $aData['casepercentage']       = (isset($casepercentage)) ? $casepercentage : false;
+            $aData['sumitems']             = $sumitems ?? false;
+            $aData['sumpercentage']        = $sumpercentage ?? false;
+            $aData['TotalCompleted']       = $TotalCompleted ?? false;
+            $aData['casepercentage']       = $casepercentage ?? false;
 
-            $aData['bNAgData']                      = (isset($bNAgData)) ? $bNAgData : false;
-            $aData['bNAgDataExtraLine']             = (isset($bNAgDataExtraLine)) ? $bNAgDataExtraLine : false;
-            $aData['showAggregatedPercentage']      = (isset($showAggregatedPercentage)) ? $showAggregatedPercentage : false;
-            $aData['showEmptyAggregatedPercentage'] = (isset($showEmptyAggregatedPercentage)) ? $showEmptyAggregatedPercentage : false;
-            $aData['bShowSumAnswer']                = (isset($bShowSumAnswer)) ? $bShowSumAnswer : false;
+            $aData['bNAgData']                      = $bNAgData ?? false;
+            $aData['bNAgDataExtraLine']             = $bNAgDataExtraLine ?? false;
+            $aData['showAggregatedPercentage']      = $showAggregatedPercentage ?? false;
+            $aData['showEmptyAggregatedPercentage'] = $showEmptyAggregatedPercentage ?? false;
+            $aData['bShowSumAnswer']                = $bShowSumAnswer ?? false;
 
             // Generate answer
             // _statisticsoutput_answer
@@ -3073,7 +3048,7 @@ class statistics_helper
             //it's only useful to calculate standard deviation and arithmetic means for question types
             //5 = 5 Point Scale
             //A = Array (5 Point Choice)
-            if ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_CHOICE_QUESTIONS) {
+            if ($outputs['qtype'] == Question::QT_5_POINT_CHOICE || $outputs['qtype'] == Question::QT_A_ARRAY_5_POINT) {
                 $stddev = 0;
                 $stddevarray = array_slice($grawdata, 0, 5, true);
                 $am = 0;
@@ -3206,7 +3181,7 @@ class statistics_helper
         // _statisticsoutput_graphs.php
 
         //-------------------------- PCHART OUTPUT ----------------------------
-        list($qsid, $qgid, $qqid) = explode("X", $rt, 3);
+        list($qsid, $qgid, $qqid) = explode("X", (string) $rt, 3);
         $qsid = $surveyid;
         $attrQid = $outputs['parentqid'] > 0 ? $outputs['parentqid'] : $qqid; // use parentqid if exists
         $aattr = QuestionAttribute::model()->getQuestionAttributes($attrQid);
@@ -3380,7 +3355,7 @@ class statistics_helper
         //close table/output
         if ($outputType == 'html') {
             // show this block only when we show graphs and are not in the public statics controller
-            if ($usegraph == 1 && $bShowGraph && get_class(Yii::app()->getController()) !== 'Statistics_userController') {
+            if ($usegraph == 1 && $bShowGraph && get_class(Yii::app()->getController()) !== 'StatisticsUserController') {
                 // We clean the labels
                 $iMaxLabelLength = 0;
 
@@ -3421,7 +3396,7 @@ class statistics_helper
                 $aData['graph_labels_percent'] = $labels_percent;
                 $aData['labels'] = $labels;
                 //$aData['COLORS_FOR_SURVEY'] = COLORS_FOR_SURVEY;
-                $aData['charttype'] = (isset($charttype)) ? $charttype : 'Bar';
+                $aData['charttype'] = $charttype ?? 'Bar';
                 $aData['sChartname'] = '';
                 $aData['grawdata'] = $grawdata;
                 $aData['color'] = 0;
@@ -3450,7 +3425,6 @@ class statistics_helper
         $survey = Survey::model()->findByPk($surveyid);
 
         Yii::import('application.helpers.surveytranslator_helper', true);
-        Yii::import('application.third_party.ar-php.Arabic', true);
 
         //pick the best font file if font setting is 'auto'
         if (is_null($sLanguageCode)) {
@@ -3493,7 +3467,6 @@ class statistics_helper
         //START Chop up fieldname and find matching questions
 
         //loop through all selected questions
-        $count = 0;
         foreach ($runthrough as $rt) {
             ////Step 1: Get information about this response field (SGQA) for the summary
             $outputs = $this->buildOutputList($rt, $language, $surveyid, $outputType, $sql, $sLanguageCode);
@@ -3501,22 +3474,10 @@ class statistics_helper
             //2. Collect and Display results #######################################################################
 
             if (isset($outputs['alist']) && $outputs['alist']) {
-                $count = $count + 1;
-
                 $display = $this->displaySimpleResults($outputs, $results, $rt, $outputType, $surveyid, $sql, $usegraph, $browse, $sLanguageCode);
                 $sOutputHTML .= $display['statisticsoutput'];
                 $aStatisticsData = array_merge($aStatisticsData, $display['astatdata']);
-
-                // Add row break after every second column for md size
-                if ($count % 2 == 0) {
-                    $sOutputHTML .= '<div class="clearfix visible-md-block"></div>';
-                }
-                // Add row break after every third column for lg size
-                if ($count % 3 == 0) {
-                    $sOutputHTML .= '<div class="clearfix visible-lg-block"></div>';
-                }
             }    //end if -> collect and display results
-
 
             //Delete Build Outputs data
             unset($outputs);
@@ -3525,7 +3486,7 @@ class statistics_helper
 
         $sOutputHTML .= '</div>';
 
-        $sGoogleMapsAPIKey = trim(Yii::app()->getConfig("googleMapsAPIKey"));
+        $sGoogleMapsAPIKey = trim((string) Yii::app()->getConfig("googleMapsAPIKey"));
         if (!empty($sGoogleMapsAPIKey)) {
             $sOutputHTML .= "<script type=\"text/javascript\" src=\"//maps.googleapis.com/maps/api/js?sensor=false&key={$sGoogleMapsAPIKey}\"></script>\n";
         }
@@ -3538,9 +3499,15 @@ class statistics_helper
 
     /**
      * Generates statistics with subviews
+     * @psalm-suppress UndefinedVariable
      */
     public function generate_html_chartjs_statistics($surveyid, $allfields, $q2show = 'all', $usegraph = 0, $outputType = 'pdf', $pdfOutput = 'I', $sLanguageCode = null, $browse = true)
     {
+        if (!isset($surveyid)) {
+            $surveyid = (int) returnGlobal('sid');
+        } else {
+            $surveyid = (int) $surveyid;
+        }
 
         $aStatisticsData = array();
         $survey = Survey::model()->findByPk($surveyid);
@@ -3549,20 +3516,15 @@ class statistics_helper
         //load surveytranslator helper
 
         Yii::import('application.helpers.surveytranslator_helper', true);
-        Yii::import('application.third_party.ar-php.Arabic', true);
 
         //pick the best font file if font setting is 'auto'
         if (is_null($sLanguageCode)) {
             $sLanguageCode = $survey->language;
         }
 
-        //no survey ID? -> come and get one
-        if (!isset($surveyid)) {
-            $surveyid = returnGlobal('sid');
-        }
-
         // Set language for questions and answers to base language of this survey
         $language = $sLanguageCode;
+        $surveyid = (int) $surveyid;
 
         if ($q2show == 'all') {
             $summarySql = " SELECT gid, parent_qid, qid, type "
@@ -3581,7 +3543,7 @@ class statistics_helper
                 if ($field['type'] == Question::QT_P_MULTIPLE_CHOICE_WITH_COMMENTS) {
                     $myField = "P" . $myField;
                 }
-                //numerical input will get special treatment (arihtmetic mean, standard derivation, ...)
+                //Numerical input will get special treatment (arihtmetic mean, standard derivation, ...)
                 if ($field['type'] == Question::QT_N_NUMERICAL) {
                     $myField = "N" . $myField;
                 }
@@ -3600,9 +3562,10 @@ class statistics_helper
                     $myField = "D" . $myField;
                 }
 
-                if ($field['type'] == Question::QT_F_ARRAY_FLEXIBLE_ROW || $field['type'] == "Question::QT_H_ARRAY_FLEXIBLE_COLUMN") {
+                if ($field['type'] == Question::QT_F_ARRAY || $field['type'] == "Question::QT_H_ARRAY_COLUMN") {
+                    $db = Yii::app()->db;
                     //Get answers. We always use the answer code because the label might be too long elsewise
-                    $query = "SELECT code, answer FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid  WHERE a.qid='" . $field['qid'] . "' AND a.scale_id=0 AND l.language='{$language}' ORDER BY a.sortorder, l.answer";
+                    $query = "SELECT code, answer FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid  WHERE a.qid={$db->quoteValue($field['qid'])} AND a.scale_id=0 AND l.language={$db->quoteValue($language)} ORDER BY a.sortorder, l.answer";
                     $result = Yii::app()->db->createCommand($query)->query();
 
                     //check all the answers
@@ -3628,7 +3591,7 @@ class statistics_helper
                     //print_r($_POST);
                     //if $summary isn't an array we create one
             if (isset($summary) && !is_array($summary)) {
-                $summary = explode("+", $summary);
+                $summary = explode("+", (string) $summary);
             }
         }
 
@@ -3702,7 +3665,7 @@ class statistics_helper
 
         $aData['results'] = $results;
         $aData['total'] = $total;
-        $aData['percent'] = (isset($percent)) ? $percent : ''; // If nobody passed the survey
+        $aData['percent'] = $percent ?? ''; // If nobody passed the survey
         $aData['browse'] = $bBrowse;
         $aData['surveyid'] = $surveyid;
         $aData['sql'] = $sql;
@@ -3742,7 +3705,7 @@ class statistics_helper
             }
         }    //end if -> show summary results
 
-        $sGoogleMapsAPIKey = trim(Yii::app()->getConfig("googleMapsAPIKey"));
+        $sGoogleMapsAPIKey = trim((string) Yii::app()->getConfig("googleMapsAPIKey"));
         if (!empty($sGoogleMapsAPIKey)) {
             $sOutputHTML .= "<script type=\"text/javascript\" src=\"//maps.googleapis.com/maps/api/js?sensor=false&key={$sGoogleMapsAPIKey}\"></script>\n";
         }
@@ -3755,21 +3718,27 @@ class statistics_helper
     /**
      * Generates statistics
      *
-     * @param int $surveyid The survey id
+     * @param int $surveyid The survey ID
      * @param mixed $allfields
      * @param mixed $q2show
      * @param integer $usegraph
      * @param string $outputType Optional - Can be xls, html or pdf - Defaults to pdf
      * @param mixed $browse  Show browse buttons
      * @return string
+     * @psalm-suppress UndefinedVariable
      */
     public function generate_statistics($surveyid, $allfields, $q2show = 'all', $usegraph = 0, $outputType = 'pdf', $outputTarget = 'I', $sLanguageCode = null, $browse = true)
     {
+        if (!isset($surveyid)) {
+            $surveyid = (int) returnGlobal('sid');
+        } else {
+            $surveyid = (int) $surveyid;
+        }
+
         $survey = Survey::model()->findByPk($surveyid);
         $aStatisticsData = array(); //astatdata generates data for the output page's javascript so it can rebuild graphs on the fly
         //load surveytranslator helper
         Yii::import('application.helpers.surveytranslator_helper', true);
-        Yii::import('application.third_party.ar-php.Arabic', true);
 
         $sOutputHTML = ""; //This string carries all the actual HTML code to print.
         $sTempDir = Yii::app()->getConfig("tempdir");
@@ -3790,11 +3759,6 @@ class statistics_helper
          * get/set Survey Details
          */
 
-        //no survey ID? -> come and get one
-        if (!isset($surveyid)) {
-            $surveyid = returnGlobal('sid');
-        }
-
         // Set language for questions and answers to base language of this survey
         $language = $sLanguageCode;
 
@@ -3809,18 +3773,19 @@ class statistics_helper
                 $myField = $surveyid . "X" . $field['gid'] . "X" . $field['qid'];
 
                 // Multiple choice get special treatment
-                //numerical input will get special treatment (arihtmetic mean, standard derivation, ...)
+                //Numerical input will get special treatment (arihtmetic mean, standard derivation, ...)
                 // textfields get special treatment
                 //statistics for Date questions are not implemented yet.
                 // See buildOutputList for special treatment
-                $specialQuestionTypes = array(Question::QT_M_MULTIPLE_CHOICE, Question::QT_P_MULTIPLE_CHOICE_WITH_COMMENTS, Question::QT_T_LONG_FREE_TEXT, Question::QT_S_SHORT_FREE_TEXT, Question::QT_Q_MULTIPLE_SHORT_TEXT, Question::QT_R_RANKING_STYLE, Question::QT_VERTICAL_FILE_UPLOAD, "", Question::QT_N_NUMERICAL, Question::QT_K_MULTIPLE_NUMERICAL_QUESTION, Question::QT_D_DATE);
+                $specialQuestionTypes = array(Question::QT_M_MULTIPLE_CHOICE, Question::QT_P_MULTIPLE_CHOICE_WITH_COMMENTS, Question::QT_T_LONG_FREE_TEXT, Question::QT_S_SHORT_FREE_TEXT, Question::QT_Q_MULTIPLE_SHORT_TEXT, Question::QT_R_RANKING, Question::QT_VERTICAL_FILE_UPLOAD, "", Question::QT_N_NUMERICAL, Question::QT_K_MULTIPLE_NUMERICAL, Question::QT_D_DATE);
                 if (in_array($field['type'], $specialQuestionTypes)) {
                     $myField = $field['type'] . $myField;
                 }
 
                 if ($field['type'] == "F" || $field['type'] == "H") {
+                    $db = Yii::app()->db;
                     //Get answers. We always use the answer code because the label might be too long elsewise
-                    $query = "SELECT code, answer FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid  WHERE a.qid='" . $field['qid'] . "' AND a.scale_id=0 AND l.language='{$language}' ORDER BY a.sortorder, l.answer";
+                    $query = "SELECT code, answer FROM {{answers}} a JOIN {{answer_l10ns}} l ON a.aid = l.aid  WHERE a.qid={$db->quoteValue($field['qid'])} AND a.scale_id=0 AND l.language={$db->quoteValue($language)} ORDER BY a.sortorder, l.answer";
                     $result = Yii::app()->db->createCommand($query)->query();
 
                     //check all the answers
@@ -3846,7 +3811,7 @@ class statistics_helper
             //print_r($_POST);
             //if $summary isn't an array we create one
             if (isset($summary) && !is_array($summary)) {
-                $summary = explode("+", $summary);
+                $summary = explode("+", (string) $summary);
             }
         }
 
@@ -3869,8 +3834,6 @@ class statistics_helper
             /**
              * Initiate the Spreadsheet_Excel_Writer
              */
-            require_once(APPPATH . '/third_party/pear/Spreadsheet/Excel/Writer.php');
-
             if ($outputTarget == 'F') {
                 $sFileName = $sTempDir . '/statistic-survey' . $surveyid . '.xls';
                 $this->workbook = new Spreadsheet_Excel_Writer($sFileName);
@@ -3903,9 +3866,6 @@ class statistics_helper
         /**
          * Start generating
          */
-
-
-
         $selects = buildSelects($allfields, $surveyid, $language);
 
         //count number of answers
@@ -4005,10 +3965,10 @@ class statistics_helper
         //only continue if we have something to output
         if ($results > 0) {
             if ($outputType == 'html' && $browse === true && Permission::model()->hasSurveyPermission($surveyid, 'responses', 'read')) {
-                //add a buttons to browse results
-                $sOutputHTML .= CHtml::form(array("admin/responses/sa/browse/surveyid/{$surveyid}"), 'post', array('target' => '_blank')) . "\n"
+                // add a buttons to browse results
+                $sOutputHTML .= CHtml::form(["responses/browse/", 'surveyId' => $surveyid], 'post', array('target' => '_blank')) . "\n"
                 . "\t\t<p>"
-                . "\t\t\t<input type='submit' class='btn btn-default' value='" . gT("Browse") . "'  />\n"
+                . "\t\t\t<input type='submit' class='btn btn-outline-secondary' value='" . gT("Browse") . "'  />\n"
                 . "\t\t\t<input type='hidden' name='sid' value='$surveyid' />\n"
                 . "\t\t\t<input type='hidden' name='sql' value=\"$sql\" />\n"
                 . "\t\t\t<input type='hidden' name='subaction' value='all' />\n"
@@ -4079,7 +4039,7 @@ class statistics_helper
 
                 break;
             case 'html':
-                $sGoogleMapsAPIKey = trim(Yii::app()->getConfig("googleMapsAPIKey"));
+                $sGoogleMapsAPIKey = trim((string) Yii::app()->getConfig("googleMapsAPIKey"));
                 if (!empty($sGoogleMapsAPIKey)) {
                     $sOutputHTML .= "<script type=\"text/javascript\" src=\"//maps.googleapis.com/maps/api/js?sensor=false&key={$sGoogleMapsAPIKey}\"></script>\n";
                 }
@@ -4114,50 +4074,53 @@ class statistics_helper
      * @staticvar null $field
      * @staticvar null $allRows
      * @param integer $quartile use 0 for return of recordcount, otherwise will return Q1,Q2,Q3
-     * @param string $fieldname
-     * @param int $surveyid
+     * @param array $fielddata
      * @param string $sql
      * @param bool $excludezeros
      * @return null|float
      */
-    protected function getQuartile($quartile, $fieldname, $surveyid, $sql, $excludezeros)
+    protected function getQuartile($quartile, $fielddata, $sql, $excludezeros)
     {
         static $sid = null;
         static $recordCount = 0;
         static $field = null;
         static $allRows = null;
 
-        if ($surveyid !== $sid || $fieldname !== $field) {
+        $criteria = new CDbCriteria();
+        if ($fielddata['sid'] !== $sid || $fielddata['fieldname'] !== $field) {
             //get data
-            $query = " FROM {{survey_$surveyid}} WHERE " . Yii::app()->db->quoteColumnName($fieldname) . " IS NOT null";
+            $criteria->addCondition(Yii::app()->db->quoteColumnName($fielddata['fieldname']) . " IS NOT null");
             //NO ZEROES
             if (!$excludezeros) {
-                $query .= " AND " . Yii::app()->db->quoteColumnName($fieldname) . " != 0";
+                $criteria->addCondition(Yii::app()->db->quoteColumnName($fielddata['fieldname']) . " != 0");
             }
 
             //filtering enabled?
             if (incompleteAnsFilterState() == "incomplete") {
-                $query .= " AND submitdate is null";
+                $criteria->addCondition("submitdate is null");
             } elseif (incompleteAnsFilterState() == "complete") {
-                $query .= " AND submitdate is not null";
+                $criteria->addCondition("submitdate is not null");
             }
 
             //if $sql values have been passed to the statistics script from another script, incorporate them
             if (!empty($sql)) {
-                $query .= " AND $sql";
+                $criteria->addCondition($sql);
             }
         }
 
-        if ($surveyid !== $sid) {
-            $sid = $surveyid;
+        if ($fielddata['sid'] !== $sid) {
+            $sid = $fielddata['sid'];
             $recordCount = 0;
             $field = null; // Reset cache
         }
 
-        if ($fieldname !== $field) {
-            $field = $fieldname;
-            $allRows = Yii::app()->db->createCommand("SELECT " . Yii::app()->db->quoteColumnName($fieldname) . $query . ' ORDER BY ' . Yii::app()->db->quoteColumnName($fieldname))->queryAll();
-            $recordCount = Yii::app()->db->createCommand("SELECT COUNT(" . Yii::app()->db->quoteColumnName($fieldname) . ")" . $query)->queryScalar(); // Record count for THIS $fieldname
+        if ($fielddata['fieldname'] !== $field) {
+            $field = $fielddata['fieldname'];
+            $criteria->select = Yii::app()->db->quoteColumnName($fielddata['fieldname']);
+            $criteria->order = Yii::app()->db->quoteColumnName($fielddata['fieldname']);
+            $allRows = Yii::app()->db->getCommandBuilder()->createFindCommand("{{survey_{$fielddata['sid']}}}", $criteria)->queryAll();
+            $criteria->select = "COUNT(" . Yii::app()->db->quoteColumnName($fielddata['fieldname']) . ")";
+            $recordCount = Response::model($fielddata['sid'])->count($criteria); // Record count for THIS $fieldname
         }
 
         // Qx = (x/4) * (n+1) if not integer, interpolate
@@ -4187,10 +4150,22 @@ class statistics_helper
         $q1 = $quartile / 4 * ($recordCount + 1);
         $row = $q1 - 1; // -1 since we start counting at 0
         if ($q1 === (int) $q1) {
-            return $allRows[$row][$fieldname];
+            if ($fielddata['encrypted'] === "Y") {
+                $quartileValue = LSActiveRecord::decryptSingle($allRows[$row][$fielddata['fieldname']]);
+            } else {
+                $quartileValue = $allRows[$row][$fielddata['fieldname']];
+            }
+            return $quartileValue;
         } else {
-            $diff = ($q1 - (int) $q1);
-            return $allRows[$row][$fieldname] + $diff * ($allRows[$row + 1][$fieldname] - $allRows[$row][$fieldname]);
+            $diff = ($q1 - (int)$q1);
+            if ($fielddata['encrypted'] === "Y") {
+                $firstRowFieldvalue = (float) LSActiveRecord::decryptSingle($allRows[$row][$fielddata['fieldname']]);
+                $nextRowFieldvalue = (float) LSActiveRecord::decryptSingle($allRows[$row + 1][$fielddata['fieldname']]);
+            } else {
+                $firstRowFieldvalue = $allRows[$row][$fielddata['fieldname']];
+                $nextRowFieldvalue = $allRows[$row + 1][$fielddata['fieldname']];
+            }
+            return $firstRowFieldvalue + $diff * ($nextRowFieldvalue - $firstRowFieldvalue);
         }
     }
 
@@ -4252,15 +4227,15 @@ class statistics_helper
         if (!isset($maxchars)) {
             $maxchars = 70;
         }
-        $htmlhinttext = str_replace("'", '&#039;', $hinttext); //the string is already HTML except for single quotes so we just replace these only
+        $htmlhinttext = str_replace("'", '&#039;', (string) $hinttext); //the string is already HTML except for single quotes so we just replace these only
         $jshinttext = javascriptEscape($hinttext, true, true); //Build a javascript safe version of the string
 
-        if (strlen($hinttext) > ($maxchars)) {
+        if (strlen((string) $hinttext) > ($maxchars)) {
             $shortstring = flattenText($hinttext);
             $shortstring = htmlspecialchars(mb_strcut(html_entity_decode($shortstring, ENT_QUOTES, 'UTF-8'), 0, $maxchars, 'UTF-8'));
             $sTextToShow = gT("Question", "js") . ': ' . $jshinttext;
             $reshtml = '<span>' . $shortstring . '...</span>';
-            $reshtml .= '<span  class="show_speaker icon-assessments text-success" style="cursor: pointer" title="' . $sTextToShow . '"  data-toggle="tooltip" data-placement="bottom"  >';
+            $reshtml .= '<span  class="show_speaker ri-chat-3-line" style="cursor: pointer" title="' . $sTextToShow . '"  data-bs-toggle="tooltip" data-bs-placement="bottom"  >';
             $reshtml .= '</span>';
         } else {
             $reshtml = "<span style='cursor: pointer' title='" . $htmlhinttext . "'> \"$htmlhinttext\"</span>";
